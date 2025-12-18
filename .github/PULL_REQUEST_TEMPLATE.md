@@ -18,11 +18,11 @@
 
 ## 작업 타입
 > 해당하는 항목을 제외하고 삭제해주세요
-- [ ] Bug fix (Non-breaking)
-- [ ] New feature (Non-breaking)
-- [ ] Breaking Change
+- Bug fix (Non-breaking)
+- New feature (Non-breaking)
+- Breaking Change
   - **상세 내역** (어떤 곳에서 변경이 필요한가요?):
-- [ ] 문서 변경이 필요한 경우
+- 문서 변경이 필요한 경우
   - **세부 내역**:
 
 ---
