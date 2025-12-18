@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.app.json",
   "include": [
-    "src",
+    "apps/web/src",
     "vite.config.ts",
     "eslint.config.js"
   ],
