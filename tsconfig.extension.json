@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022", "DOM", "WebWorker"],
     "module": "ESNext",
+    "types": ["chrome"],
     "moduleResolution": "bundler",
     "strict": true,
     "noEmit": true
   },
-  "include": [
-    "src/**/*",
-    "extension/**/*",
-    "vite.config.ts",
-    "vite.extension.config.ts",
-    "eslint.config.js"
-  ]
+  "include": ["extension/**/*.ts"]
 }
