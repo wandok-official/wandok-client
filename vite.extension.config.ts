@@ -4,7 +4,7 @@ import { resolve } from 'path';
 // 익스텐션용 Vite 설정
 export default defineConfig({
   build: {
-    outDir: 'extension/dist',
+    outDir: 'apps/extension/dist',
     emptyOutDir: true,
 
     // 소스맵 생성 여부 (배포 시 false로 변경 필요)
@@ -12,8 +12,8 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
-        background: resolve(__dirname, 'extension/src/background.ts'),
-        content: resolve(__dirname, 'extension/src/content.ts'),
+        background: resolve(__dirname, 'apps/extension/src/background.ts'),
+        content: resolve(__dirname, 'apps/extension/src/content.ts'),
       },
       output: {
         entryFileNames: '[name].js',
@@ -22,5 +22,5 @@ export default defineConfig({
       },
     },
   },
-  publicDir: 'extension/public',
+  publicDir: 'apps/extension/public',
 });

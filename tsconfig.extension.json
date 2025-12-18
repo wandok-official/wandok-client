@@ -8,5 +8,5 @@
     "strict": true,
     "noEmit": true
   },
-  "include": ["extension/**/*.ts"]
+  "include": ["apps/extension/src/**/*.ts"]
 }
