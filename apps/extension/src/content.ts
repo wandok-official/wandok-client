@@ -54,9 +54,9 @@ const initFocusMode = () => {
           blockElement.contains(el);
 
         if (isRelated) {
-          el.classList.remove('blur');
+          el.classList.remove('wandok-blur');
         } else {
-          el.classList.add('blur');
+          el.classList.add('wandok-blur');
         }
       });
     });
@@ -65,7 +65,7 @@ const initFocusMode = () => {
     wrapperSpan.addEventListener('mouseleave', () => {
       // 모든 블러 효과 즉시 제거 (초기화)
       allBlockElements.forEach((el) => {
-        el.classList.remove('blur');
+        el.classList.remove('wandok-blur');
       });
     });
   });

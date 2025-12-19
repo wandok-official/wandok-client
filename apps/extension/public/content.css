@@ -1,5 +1,5 @@
 /* 블러 처리 클래스 */
-.blur {
+.wandok-blur {
   filter: blur(4px);
   opacity: 0.5;
 }
