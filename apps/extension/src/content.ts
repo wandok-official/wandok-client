@@ -1,73 +1,71 @@
 import { extractTextNodes } from './extractTextNodes';
+import { segmentSentences } from './segmentSentences';
+import { splitParagraph } from './splitParagraph';
+import { applyBlurEffect } from './applyBlurEffect';
+
+// 블록 요소를 찾기 위한 셀렉터 정의
+const BLOCK_SELECTOR = 'p, div, li, h1, h2, h3, h4, h5, h6, section, article, blockquote';
+
+// 관리 대상 문단들을 저장할 Set
+const allBlockElements = new Set<HTMLElement>();
+
+/**
+ * 특정 요소의 가장 가까운 문단(Block) 요소를 찾는 헬퍼 함수
+ */
+const getClosestBlock = (el: HTMLElement) => el.closest(BLOCK_SELECTOR) as HTMLElement;
 
 const initFocusMode = () => {
-  // 1. 텍스트 노드 추출
   const textNodes = extractTextNodes(document.body);
 
-  // 블러 처리를 제어할 '문단(블록)' 요소들을 저장할 Set
-  const allBlockElements = new Set<HTMLElement>();
-
-  // 2. 텍스트 노드를 <span> 태그로 감싸기 (Wrapping)
   textNodes.forEach((textNode) => {
-    // 2-1. 텍스트 노드의 부모(문단 역할) 찾기
-    const blockElement = textNode.parentElement?.closest(
-      'p, div, li, h1, h2, h3, h4, h5, h6, section, article, blockquote'
-    ) as HTMLElement;
+    // 초기 텍스트 노드의 부모 확인
+    const initialParent = getClosestBlock(textNode.parentElement as HTMLElement);
+    if (!initialParent || initialParent === document.body) return;
 
-    // 유효한 문단 요소라면 관리 대상에 추가
-    if (blockElement && blockElement !== document.body) {
-      allBlockElements.add(blockElement);
-    } else {
-      // 문단에 속하지 않는 텍스트라면 스킵
-      return;
-    }
+    allBlockElements.add(initialParent);
 
-    // 2-2. 텍스트 노드를 <span>으로 교체
-    // 이렇게 하면 '박스 영역'이 아닌 '글자 영역'에만 이벤트를 걸 수 있습니다.
-    const wrapperSpan = document.createElement('span');
-    wrapperSpan.textContent = textNode.textContent;
-    wrapperSpan.classList.add('wandok-text-wrapper');
+    const sentences = segmentSentences(textNode.textContent || '');
+    const fragment = document.createDocumentFragment();
 
-    // 기존 텍스트 노드를 새로 만든 span으로 교체
-    textNode.parentNode?.replaceChild(wrapperSpan, textNode);
+    sentences.forEach((sentenceText) => {
+      const sentenceSpan = document.createElement('span');
+      sentenceSpan.textContent = sentenceText;
+      sentenceSpan.classList.add('wandok-text-wrapper');
 
-    // 3. 이벤트 리스너 등록 (<span>에 등록)
+      // [기능 1] 클릭 시 문단 분리
+      sentenceSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
 
-    // 마우스가 '글자' 위에 올라갔을 때
-    wrapperSpan.addEventListener('mouseenter', () => {
-      allBlockElements.forEach((el) => {
-        /**
-         * 현재 호버된 문단(blockElement)과 구조적으로 연관된 요소인지 판별하여 블러 여부를 결정합니다.
-         * 부모가 블러 처리되면 자식도 안 보이고, 자식이 블러 처리되면 내부 내용이 안 보이기 때문에
-         * 연관된 계층 구조(조상, 자손)를 모두 선명하게 유지해야 합니다.
-         *
-         * @condition 1. (Self) el === blockElement
-         *    - 현재 호버된 문단 그 자체
-         * @condition 2. (Ancestor) el.contains(blockElement)
-         *    - 현재 문단을 감싸고 있는 상위 요소 (이 요소가 흐려지면 내부의 현재 문단도 흐려짐)
-         * @condition 3. (Descendant) blockElement.contains(el)
-         *    - 현재 문단 안에 포함된 하위 요소 (현재 문단은 선명한데 내부 글자가 흐려지면 안 됨)
-         */
-        const isRelated =
-          el === blockElement ||
-          el.contains(blockElement) ||
-          blockElement.contains(el);
+        // 1. 문단 분리 실행 (이 과정에서 sentenceSpan의 부모가 바뀜)
+        splitParagraph(sentenceSpan);
 
-        if (isRelated) {
-          el.classList.remove('wandok-blur');
-        } else {
-          el.classList.add('wandok-blur');
+        // 2. 분리되어 새로 생성된 문단을 관리 대상 Set에 추가
+        const newParent = getClosestBlock(sentenceSpan);
+        if (newParent) {
+          allBlockElements.add(newParent);
         }
       });
+
+      // [기능 2] 마우스 호버 시 블러 처리
+      sentenceSpan.addEventListener('mouseenter', () => {
+        // ★ 핵심 수정: 고정된 변수가 아니라, 호버 시점의 "현재 부모"를 실시간으로 찾음
+        const currentBlock = getClosestBlock(sentenceSpan);
+        if (currentBlock) {
+          applyBlurEffect(currentBlock, allBlockElements, true);
+        }
+      });
+
+      sentenceSpan.addEventListener('mouseleave', () => {
+        const currentBlock = getClosestBlock(sentenceSpan);
+        if (currentBlock) {
+          applyBlurEffect(currentBlock, allBlockElements, false);
+        }
+      });
+
+      fragment.appendChild(sentenceSpan);
     });
 
-    // 마우스가 '글자'에서 벗어났을 때
-    wrapperSpan.addEventListener('mouseleave', () => {
-      // 모든 블러 효과 즉시 제거 (초기화)
-      allBlockElements.forEach((el) => {
-        el.classList.remove('wandok-blur');
-      });
-    });
+    textNode.parentNode?.replaceChild(fragment, textNode);
   });
 };
 
