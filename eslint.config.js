@@ -11,7 +11,7 @@ export default defineConfig([
   /* =========================================
      [1] 전역 무시 설정
   ========================================= */
-  globalIgnores(['dist', 'node_modules']),
+  globalIgnores(['extension/dist', 'node_modules']),
 
 
   /* =========================================
@@ -89,7 +89,6 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         project: './tsconfig.eslint.json',
-        tsconfigRootDir: import.meta.dirname,
       },
     },
 

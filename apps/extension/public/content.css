@@ -1,0 +1,13 @@
+/* 블러 처리 클래스 */
+.wandok-blur {
+  filter: blur(4px);
+  opacity: 0.5;
+}
+
+/*
+  텍스트 감지용 래퍼 클래스
+  (특별한 스타일은 없지만, 추후 디버깅이나 확장을 위해 클래스명 부여)
+*/
+.wandok-text-wrapper {
+  cursor: default;
+}

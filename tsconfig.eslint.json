@@ -1,11 +1,17 @@
 {
   "extends": "./tsconfig.app.json",
-  "include": [
-    "apps/web/src",
-    "vite.config.ts",
-    "eslint.config.js"
-  ],
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "apps/web/src/**/*",
+    "apps/extension/src/**/*",
+    "vite.config.ts",
+    "vite.extension.config.ts",
+    "eslint.config.js"
+  ]
 }
