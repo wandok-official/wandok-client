@@ -1,13 +1,15 @@
-export const getScrollPercentage = () => {
-  window.addEventListener('scroll', () => {
-    const scrollTop = window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
-    const windowHeight = window.innerHeight;
+export const getScrollPercentage = (): number => {
+  const scrollTop = window.scrollY;
+  const documentHeight = document.documentElement.scrollHeight;
+  const windowHeight = window.innerHeight;
 
-    const scrollableArea = documentHeight - windowHeight;
+  const scrollableArea = documentHeight - windowHeight;
 
-    const scrollPercentage = Math.floor((scrollTop / scrollableArea) * 100);
+  if (scrollableArea <= 0) {
+    return 100;
+  }
 
-    return scrollPercentage;
-  });
+  const scrollPercentage = Math.floor((scrollTop / scrollableArea) * 100);
+
+  return Math.min(100, Math.max(0, scrollPercentage));
 };
