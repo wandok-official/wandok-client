@@ -1,4 +1,4 @@
-import { extractTextNodes } from './extractTextNodes';
+import { extractTextNodes } from './utils/extractTextNodes';
 
 const initFocusMode = () => {
   // 1. 텍스트 노드 추출
