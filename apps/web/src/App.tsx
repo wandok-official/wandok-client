@@ -1,7 +1,7 @@
-import React from 'react';
+import './index.css';
 
 function App() {
-  return <h1>Hello Wandok!</h1>;
+  return <h1 className="underline">Hello Wandok!</h1>;
 }
 
 export default App;
