@@ -6,7 +6,8 @@
     "types": ["chrome"],
     "moduleResolution": "bundler",
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "jsx": "react-jsx"
   },
-  "include": ["apps/extension/src/**/*.ts"]
+  "include": ["apps/extension/src/**/*.ts", "apps/extension/src/**/*.tsx"]
 }
