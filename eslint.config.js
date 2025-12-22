@@ -11,7 +11,7 @@ export default defineConfig([
   /* =========================================
      [1] 전역 무시 설정
   ========================================= */
-  globalIgnores(['extension/dist', 'node_modules']),
+  globalIgnores(['apps/extension/dist', 'node_modules']),
 
 
   /* =========================================
