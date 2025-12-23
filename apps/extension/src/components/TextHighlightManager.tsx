@@ -3,11 +3,29 @@ import { NotePopover } from './NotePopover';
 
 /* Text Highlight on Selection */
 export const TextHighlightManager = () => {
-  // TODO: 향후 Close 버튼이나 팝오버 외부 클릭 시 하이라이트를 제거하기 위해 사용 예정
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentHighlight, setCurrentHighlight] = useState<HTMLElement | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
+
+  const handleClose = () => {
+    setIsPopoverOpen(false);
+    
+    // 현재 하이라이트 제거
+    if (currentHighlight) {
+      const parent = currentHighlight.parentNode;
+      const textContent = currentHighlight.textContent;
+      if (parent && textContent) {
+        const textNode = document.createTextNode(textContent);
+        parent.replaceChild(textNode, currentHighlight);
+      }
+      setCurrentHighlight(null);
+    }
+  };
+
+  const handleSubmit = (noteText: string) => {
+    console.log('메모 내용:', noteText);
+    handleClose();
+  };
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -75,7 +93,10 @@ export const TextHighlightManager = () => {
             zIndex: 2147483647,
           }}
         >
-          <NotePopover />
+          <NotePopover 
+            onClose={handleClose}
+            onSubmit={handleSubmit}
+          />
         </div>
       )}
     </>
