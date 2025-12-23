@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NotePopover } from './NotePopover';
 
 /* Text Highlight on Selection */
@@ -7,7 +7,7 @@ export const TextHighlightManager = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsPopoverOpen(false);
     
     // 현재 하이라이트 제거
@@ -20,7 +20,7 @@ export const TextHighlightManager = () => {
       }
       setCurrentHighlight(null);
     }
-  };
+  }, [currentHighlight]);
 
   const handleSubmit = (noteText: string) => {
     console.log('메모 내용:', noteText);
@@ -79,6 +79,30 @@ export const TextHighlightManager = () => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
+
+  // 외부 클릭 감지
+  useEffect(() => {
+    if (!isPopoverOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const path = e.composedPath();
+      const isClickInsidePopover = path.some(
+        (element) => 
+          element instanceof HTMLElement && 
+          element.classList?.contains('wandok-interactive')
+      );
+
+      if (!isClickInsidePopover) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPopoverOpen, handleClose]);
 
   return (
     <>
