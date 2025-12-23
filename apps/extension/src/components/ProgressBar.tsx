@@ -33,7 +33,7 @@ export const ProgressBar = () => {
 
   return (
     <div
-      className="h-screen bg-gray-300 flex items-start relative"
+      className="h-screen bg-gray-300 flex items-start fixed top-0 right-0"
       style={{ width: PROGRESS_BAR.WIDTH }}
     >
       <div

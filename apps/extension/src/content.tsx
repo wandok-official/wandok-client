@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { PROGRESS_BAR } from './config/constants';
 import { extractTextNodes } from './utils/extractTextNodes';
-import { ProgressBar } from './components/ProgressBar';
+import { App } from './components/App';
 import contentCss from '../public/content.css?inline';
 
 import { segmentSentences } from './segmentSentences';
@@ -37,9 +37,16 @@ const initFocusMode = () => {
     :host {
       all: initial;
       position: fixed;
-      top: 0px;
-      right: 0px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
       z-index: 2147483647;
+    }
+    
+    .wandok-interactive {
+      pointer-events: auto;
     }
     
     ${contentCss}
@@ -50,7 +57,7 @@ const initFocusMode = () => {
   shadowRoot.appendChild(rootElement);
 
   const root = createRoot(rootElement);
-  root.render(<ProgressBar />);
+  root.render(<App />);
 
   /* Text Blur + Split Paragraph Logic */
   const textNodes = extractTextNodes(document.body);
