@@ -17,7 +17,9 @@ const allBlockElements = new Set<HTMLElement>();
 /**
  * 특정 요소의 가장 가까운 문단(Block) 요소를 찾는 헬퍼 함수
  */
-const getClosestBlock = (el: HTMLElement) => el.closest(BLOCK_SELECTOR) as HTMLElement;
+const getClosestBlock = (el: HTMLElement): HTMLElement | null => {
+  return el.closest(BLOCK_SELECTOR) as HTMLElement | null;
+};
 
 const initFocusMode = () => {
   /* Progress Bar Setup */
