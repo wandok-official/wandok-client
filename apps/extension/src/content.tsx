@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { PROGRESS_BAR } from './config/constants';
+import { PROGRESS_BAR, POPOVER } from './config/constants';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { App } from './components/App';
 import contentCss from '../public/content.css?inline';
@@ -25,10 +25,10 @@ const initFocusMode = () => {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 2147483647;
+      z-index: ${POPOVER.Z_INDEX};
     }
     
-    .wandok-interactive {
+    .${POPOVER.INTERACTIVE_CLASS} {
       pointer-events: auto;
     }
     
