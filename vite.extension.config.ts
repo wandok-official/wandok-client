@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 // 익스텐션용 Vite 설정
 export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
   build: {
     outDir: 'apps/extension/dist',
     emptyOutDir: true,
@@ -13,7 +19,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         background: resolve(__dirname, 'apps/extension/src/background.ts'),
-        content: resolve(__dirname, 'apps/extension/src/content.ts'),
+        content: resolve(__dirname, 'apps/extension/src/content.tsx'),
       },
       output: {
         entryFileNames: '[name].js',

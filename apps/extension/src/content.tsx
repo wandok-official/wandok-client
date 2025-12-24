@@ -1,4 +1,9 @@
-import { extractTextNodes } from './extractTextNodes';
+import { createRoot } from 'react-dom/client';
+import { PROGRESS_BAR } from './config/constants';
+import { extractTextNodes } from './utils/extractTextNodes';
+import { ProgressBar } from './components/ProgressBar';
+import contentCss from '../public/content.css?inline';
+
 import { segmentSentences } from './segmentSentences';
 import { splitParagraph } from './splitParagraph';
 import { applyBlurEffect } from './applyBlurEffect';
@@ -15,6 +20,37 @@ const allBlockElements = new Set<HTMLElement>();
 const getClosestBlock = (el: HTMLElement) => el.closest(BLOCK_SELECTOR) as HTMLElement;
 
 const initFocusMode = () => {
+  /* Progress Bar Setup */
+  document.body.style.paddingRight = PROGRESS_BAR.WIDTH;
+  document.body.style.boxSizing = 'border-box';
+
+  const shadowHost = document.createElement('div');
+  shadowHost.id = 'wandok-shadow-host';
+  document.body.appendChild(shadowHost);
+
+  const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+
+  const shadowStyle = document.createElement('style');
+  shadowStyle.textContent = `
+    :host {
+      all: initial;
+      position: fixed;
+      top: 0px;
+      right: 0px;
+      z-index: 2147483647;
+    }
+    
+    ${contentCss}
+  `;
+  shadowRoot.appendChild(shadowStyle);
+
+  const rootElement = document.createElement('div');
+  shadowRoot.appendChild(rootElement);
+
+  const root = createRoot(rootElement);
+  root.render(<ProgressBar />);
+
+  /* Text Blur + Split Paragraph Logic */
   const textNodes = extractTextNodes(document.body);
 
   textNodes.forEach((textNode) => {
