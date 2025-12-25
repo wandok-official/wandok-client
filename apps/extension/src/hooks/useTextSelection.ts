@@ -14,9 +14,11 @@ export interface SelectionResult {
 /**
  * 텍스트 선택을 감지하고 하이라이트를 적용하는 커스텀 훅
  * @param onSelectionChange - 텍스트 선택 시 호출될 콜백 함수
+ * @param onError - 하이라이트 실패 시 호출될 콜백 함수
  */
 export const useTextSelection = (
-  onSelectionChange: (result: SelectionResult) => void
+  onSelectionChange: (result: SelectionResult) => void,
+  onError?: () => void
 ): void => {
   useEffect(() => {
     const handleMouseUp = () => {
@@ -42,6 +44,9 @@ export const useTextSelection = (
             highlight: highlightedElement,
             position,
           });
+        } else {
+          // 하이라이트 실패 시 에러 콜백 호출
+          onError?.();
         }
         
         selection.removeAllRanges();
@@ -53,5 +58,5 @@ export const useTextSelection = (
     return () => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [onSelectionChange]);
+  }, [onSelectionChange, onError]);
 };
