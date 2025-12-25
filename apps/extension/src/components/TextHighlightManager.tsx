@@ -7,8 +7,12 @@ import { useHighlightScroll } from '../hooks/useHighlightScroll';
 import { removeHighlight } from '../utils/highlightUtils';
 import type { Position } from '../types/position';
 
+interface TextHighlightManagerProps {
+  onHighlightError?: () => void;
+}
+
 /* Text Highlight on Selection */
-export const TextHighlightManager = () => {
+export const TextHighlightManager = ({ onHighlightError }: TextHighlightManagerProps) => {
   const [currentHighlight, setCurrentHighlight] = useState<HTMLElement | null>(null);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<Position>({ x: 0, y: 0 });
@@ -29,11 +33,14 @@ export const TextHighlightManager = () => {
   };
   
   // 텍스트 하이라이트 시 팝오버 표시
-  useTextSelection(({ highlight, position }) => {
-    setCurrentHighlight(highlight);
-    setPopoverPosition(position);
-    setIsPopoverOpen(true);
-  });
+  useTextSelection(
+    ({ highlight, position }) => {
+      setCurrentHighlight(highlight);
+      setPopoverPosition(position);
+      setIsPopoverOpen(true);
+    },
+    onHighlightError
+  );
 
   // 스크롤 시 팝오버 위치 업데이트 (하이라이트와 함께 이동)
   useHighlightScroll(isPopoverOpen, currentHighlight, setPopoverPosition);
