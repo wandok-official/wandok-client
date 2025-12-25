@@ -6,17 +6,11 @@ import type { Position } from '../types/position';
  */
 
 /**
- * 하이라이트 요소를 제거하고 원래 텍스트 노드로 복원
+ * 하이라이트 요소를 제거하고 내부 노드를 그대로 복원
  * @param highlightedElement - 제거할 하이라이트 span 요소
  */
 export function removeHighlight(highlightedElement: HTMLElement): void {
-  const parent = highlightedElement.parentNode;
-  const textContent = highlightedElement.textContent;
-  
-  if (parent && textContent) {
-    const textNode = document.createTextNode(textContent);
-    parent.replaceChild(textNode, highlightedElement);
-  }
+  highlightedElement.replaceWith(...Array.from(highlightedElement.childNodes));
 }
 
 /**
