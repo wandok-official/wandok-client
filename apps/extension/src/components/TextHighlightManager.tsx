@@ -3,6 +3,7 @@ import { NotePopover } from './NotePopover';
 import { POPOVER } from '../config/constants';
 import { useTextSelection } from '../hooks/useTextSelection';
 import { useClickOutsideClassName } from '../hooks/useClickOutsideClassName';
+import { useHighlightScroll } from '../hooks/useHighlightScroll';
 import { removeHighlight } from '../utils/highlightUtils';
 import type { Position } from '../types/position';
 
@@ -26,7 +27,6 @@ export const TextHighlightManager = () => {
     console.log('메모 내용:', noteText);
     handleClose();
   };
-
   
   // 텍스트 하이라이트 시 팝오버 표시
   useTextSelection(({ highlight, position }) => {
@@ -34,6 +34,9 @@ export const TextHighlightManager = () => {
     setPopoverPosition(position);
     setIsPopoverOpen(true);
   });
+
+  // 스크롤 시 팝오버 위치 업데이트 (하이라이트와 함께 이동)
+  useHighlightScroll(isPopoverOpen, currentHighlight, setPopoverPosition);
 
   // 팝오버 외부 클릭 감지
   useClickOutsideClassName(isPopoverOpen, POPOVER.INTERACTIVE_CLASS, handleClose);
