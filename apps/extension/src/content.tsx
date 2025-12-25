@@ -1,12 +1,11 @@
 import { createRoot } from 'react-dom/client';
 import { PROGRESS_BAR, POPOVER } from './config/constants';
 import { extractTextNodes } from './utils/extractTextNodes';
+import { segmentSentences } from './utils/segmentSentences';
+import { splitParagraph } from './utils/splitParagraph';
+import { applyBlurEffect } from './utils/applyBlurEffect';
 import { App } from './components/App';
 import contentCss from '../public/content.css?inline';
-
-import { segmentSentences } from './segmentSentences';
-import { splitParagraph } from './splitParagraph';
-import { applyBlurEffect } from './applyBlurEffect';
 
 // 블록 요소를 찾기 위한 셀렉터 정의
 const BLOCK_SELECTOR = 'p, div, li, h1, h2, h3, h4, h5, h6, section, article, blockquote';
