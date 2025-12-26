@@ -1,14 +1,12 @@
 import { createRoot } from 'react-dom/client';
-import { PROGRESS_BAR, POPOVER } from './config/constants';
+import { PROGRESS_BAR, POPOVER, BLOCK_SELECTOR } from './config/constants';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
 import { applyBlurEffect } from './utils/applyBlurEffect';
+import { getParagraphComplexities } from './utils/getParagraphComplexities';
 import { App } from './components/App';
 import contentCss from '../public/content.css?inline';
-
-// 블록 요소를 찾기 위한 셀렉터 정의
-const BLOCK_SELECTOR = 'p, div, li, h1, h2, h3, h4, h5, h6, section, article, blockquote';
 
 // 관리 대상 문단들을 저장할 Set
 const allBlockElements = new Set<HTMLElement>();
@@ -55,8 +53,11 @@ const initFocusMode = () => {
   const rootElement = document.createElement('div');
   shadowRoot.appendChild(rootElement);
 
+  // 페이지 로드 시 복잡도 점수 계산
+  const complexityScores = getParagraphComplexities();
+
   const root = createRoot(rootElement);
-  root.render(<App />);
+  root.render(<App complexityScores={complexityScores} />);
 
   /* Text Blur + Split Paragraph Logic */
   const textNodes = extractTextNodes(document.body);

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { ProgressBar } from './ProgressBar';
 import { TextHighlightManager } from './TextHighlightManager';
 import { Toast } from './Toast';
+import type { ComplexityData } from '../types/complexity';
 
-export const App = () => {
+export const App = ({ complexityScores = [] }: Partial<ComplexityData>) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleHighlightError = () => {
@@ -12,7 +13,7 @@ export const App = () => {
 
   return (
     <>
-      <ProgressBar />
+      <ProgressBar complexityScores={complexityScores} />
       <TextHighlightManager onHighlightError={handleHighlightError} />
       {toastMessage && (
         <Toast 
