@@ -37,16 +37,10 @@ function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
-        {/* 상단 텍스트 */}
         <p className="text-gray-600 text-sm mb-2">완벽한 독서 경험</p>
-
-        {/* 메인 타이틀 - 검은색으로 변경 */}
         <h1 className="text-6xl font-bold mb-12 text-black">완독이</h1>
-
-        {/* 로그인 카드 */}
         <div className="bg-white rounded-lg shadow-lg p-8 w-96">
           <div className="space-y-6">
-            {/* 구글 로그인 버튼 */}
             <button
               onClick={handleGoogleLogin}
               className={`
