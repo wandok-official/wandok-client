@@ -13,3 +13,5 @@ export const POPOVER = {
 } as const;
 
 export const BLOCK_SELECTOR = 'p, div, li, h1, h2, h3, h4, h5, h6, section, article, blockquote';
+
+export const MIN_TEXT_LENGTH = 20;

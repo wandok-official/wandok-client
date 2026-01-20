@@ -6,7 +6,7 @@ interface ChartLayerProps {
 }
 
 const ChartLayer = ({ points, polyline, fill, stroke }: ChartLayerProps) => {
-  if (!points) return null;
+  if (points === '') return null;
 
   return (
     <>
