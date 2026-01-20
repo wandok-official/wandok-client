@@ -12,6 +12,7 @@
     "apps/extension/src/**/*",
     "vite.config.ts",
     "vite.extension.config.ts",
+    "vitest.config.ts",
     "eslint.config.js"
   ]
 }
