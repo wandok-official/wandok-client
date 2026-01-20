@@ -24,6 +24,10 @@ describe('getScrollPercentage', () => {
   afterEach(() => {
     Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
     Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      value: 0,
+      configurable: true,
+    });
   });
 
   it('페이지 상단에서 0을 반환해야 한다.', () => {
