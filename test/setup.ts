@@ -5,8 +5,7 @@ import '@testing-library/dom';
 import { mockChrome } from './mocks/chrome';
 
 beforeAll(() => {
-  // @ts-expect-error - Chrome API mock
-  globalThis.chrome = mockChrome;
+  vi.stubGlobal('chrome', mockChrome);
 });
 
 afterEach(() => {
