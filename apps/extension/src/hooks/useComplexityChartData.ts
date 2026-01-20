@@ -52,7 +52,8 @@ const interpolatePoints = (
     } else {
       if (i > 0 && allPoints[i - 1].y <= scrollPosition) {
         const prevPoint = allPoints[i - 1];
-        const ratio = (scrollPosition - prevPoint.y) / (point.y - prevPoint.y);
+        const dy = point.y - prevPoint.y;
+        const ratio = dy === 0 ? 0 : (scrollPosition - prevPoint.y) / dy;
         const interpolatedPoint = {
           x: prevPoint.x + (point.x - prevPoint.x) * ratio,
           y: scrollPosition,
