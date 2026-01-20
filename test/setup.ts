@@ -11,11 +11,15 @@ beforeAll(() => {
 
 afterEach(() => {
   cleanup();
+  // clearAllMocks: mock 호출 기록만 초기화 (mockImplementation 유지)
+  // 각 테스트 간 호출 기록 격리를 위해 사용
   vi.clearAllMocks();
   document.body.innerHTML = '';
 });
 
 afterAll(() => {
+  // resetAllMocks: mock 호출 기록 + mockImplementation 모두 초기화
+  // 전체 테스트 종료 후 완전한 정리를 위해 사용
   vi.resetAllMocks();
 });
 

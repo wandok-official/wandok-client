@@ -4,7 +4,7 @@ import { vi } from 'vitest';
  * Chrome Extension API Mock
  * 테스트에서 chrome.* API를 사용할 수 있도록 mock 제공
  */
-export const mockChrome = {
+export const mockChrome: Partial<typeof chrome> = {
   runtime: {
     onInstalled: {
       addListener: vi.fn(),

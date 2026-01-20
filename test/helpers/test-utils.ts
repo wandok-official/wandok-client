@@ -61,12 +61,19 @@ export const fireEvent = {
 
 /**
  * 테스트용 DOM 구조 생성
+ * @returns container와 cleanup 함수를 포함한 객체
  */
-export const createTestDOM = (html: string): HTMLElement => {
+export const createTestDOM = (html: string): { container: HTMLElement; cleanup: () => void } => {
   const container = document.createElement('div');
   container.innerHTML = html;
   document.body.appendChild(container);
-  return container;
+
+  return {
+    container,
+    cleanup: () => {
+      container.remove();
+    },
+  };
 };
 
 /**
@@ -132,7 +139,7 @@ export const waitForCondition = async (
 
   while (!condition()) {
     if (Date.now() - startTime > timeout) {
-      throw new Error('Condition not met within timeout');
+      throw new Error(`Condition not met within timeout (${timeout}ms)`);
     }
     await wait(interval);
   }
