@@ -19,7 +19,7 @@ export const TextHighlightManager = ({ onHighlightError }: TextHighlightManagerP
 
   const handleClose = useCallback(() => {
     setIsPopoverOpen(false);
-    
+
     // 현재 하이라이트 제거
     if (currentHighlight) {
       removeHighlight(currentHighlight);
@@ -27,20 +27,21 @@ export const TextHighlightManager = ({ onHighlightError }: TextHighlightManagerP
     }
   }, [currentHighlight]);
 
-  const handleSubmit = (noteText: string) => {
-    console.log('메모 내용:', noteText);
+  const handleSubmit = (_noteText: string) => {
     handleClose();
   };
-  
-  // 텍스트 하이라이트 시 팝오버 표시
-  useTextSelection(
-    ({ highlight, position }) => {
+
+  const handleSelectionChange = useCallback(
+    ({ highlight, position }: { highlight: HTMLElement; position: Position }) => {
       setCurrentHighlight(highlight);
       setPopoverPosition(position);
       setIsPopoverOpen(true);
     },
-    onHighlightError
+    [],
   );
+
+  // 텍스트 하이라이트 시 팝오버 표시
+  useTextSelection(handleSelectionChange, onHighlightError);
 
   // 스크롤 시 팝오버 위치 업데이트 (하이라이트와 함께 이동)
   useHighlightScroll(isPopoverOpen, currentHighlight, setPopoverPosition);
@@ -61,9 +62,10 @@ export const TextHighlightManager = ({ onHighlightError }: TextHighlightManagerP
             zIndex: POPOVER.Z_INDEX,
           }}
         >
-          <NotePopover 
+          <NotePopover
             onClose={handleClose}
             onSubmit={handleSubmit}
+            username="테스트 유저"
           />
         </div>
       )}
