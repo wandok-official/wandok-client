@@ -9,5 +9,10 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["apps/extension/src/**/*.ts", "apps/extension/src/**/*.tsx"]
+  "include": ["apps/extension/src/**/*.ts", "apps/extension/src/**/*.tsx"],
+  "exclude": [
+    "apps/extension/src/**/*.test.ts",
+    "apps/extension/src/**/*.test.tsx",
+    "apps/extension/src/**/__tests__/**"
+  ]
 }
