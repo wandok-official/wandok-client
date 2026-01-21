@@ -1,13 +1,13 @@
 /* eslint-disable @stylistic/indent */
 import { useState } from 'react';
-import { DEMO_PARAGRAPHS } from '../../mocks/demo';
+import { DEMO_PARAGRAPHS, type Paragraph } from '../../mocks/demo';
 
 interface InteractiveDemoProps {
   isDarkMode: boolean;
 }
 
 function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
-  const [paragraphs, setParagraphs] = useState(DEMO_PARAGRAPHS);
+  const [paragraphs, setParagraphs] = useState<Paragraph[]>(DEMO_PARAGRAPHS);
 
   const [hoveredSentence, setHoveredSentence] = useState<string | null>(null);
   const [scrollProgress, setScrollProgress] = useState(35);
@@ -20,10 +20,13 @@ function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
       const newParagraphs = [...prev];
       const targetParagraph = newParagraphs[paragraphIndex];
 
-      if (sentenceIndex === targetParagraph.length - 1) {
+      if (sentenceIndex === targetParagraph.sentences.length - 1) {
         const nextParagraph = newParagraphs[paragraphIndex + 1];
         if (nextParagraph) {
-          const mergedParagraph = [...targetParagraph, ...nextParagraph];
+          const mergedParagraph: Paragraph = {
+            id: targetParagraph.id, // 첫 번째 문단의 id 유지
+            sentences: [...targetParagraph.sentences, ...nextParagraph.sentences],
+          };
           const result = [
             ...newParagraphs.slice(0, paragraphIndex),
             mergedParagraph,
@@ -33,8 +36,8 @@ function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
         }
       }
 
-      const beforeSentences = targetParagraph.slice(0, sentenceIndex + 1);
-      const afterSentences = targetParagraph.slice(sentenceIndex + 1);
+      const beforeSentences = targetParagraph.sentences.slice(0, sentenceIndex + 1);
+      const afterSentences = targetParagraph.sentences.slice(sentenceIndex + 1);
 
       if (afterSentences.length === 0) {
         return prev;
@@ -42,8 +45,8 @@ function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
 
       const result = [
         ...newParagraphs.slice(0, paragraphIndex),
-        beforeSentences,
-        afterSentences,
+        { id: targetParagraph.id, sentences: beforeSentences }, // 기존 id 유지
+        { id: crypto.randomUUID(), sentences: afterSentences }, // 새 id 생성
         ...newParagraphs.slice(paragraphIndex + 1),
       ];
 
@@ -103,13 +106,13 @@ function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
             <div className="space-y-4">
               {paragraphs.map((paragraph, pIndex) => (
                 <div
-                  key={`${pIndex}-${paragraph.join('')}`}
+                  key={paragraph.id}
                   className={`
                     transition-all duration-300 p-3 rounded
                     ${isDarkMode ? 'bg-gray-700/50' : 'bg-gray-50'}
                   `}
                 >
-                  {paragraph.map((sentence, sIndex) => {
+                  {paragraph.sentences.map((sentence, sIndex) => {
                     const sentenceId = `${pIndex}-${sIndex}`;
                     const isHovered = hoveredSentence === sentenceId;
                     const isOtherHovered =
