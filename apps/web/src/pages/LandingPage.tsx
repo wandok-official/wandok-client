@@ -517,7 +517,7 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
   );
 }
 
-function LoginPage() {
+function LandingPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -642,4 +642,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default LandingPage;
