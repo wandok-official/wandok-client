@@ -18,12 +18,12 @@ export interface SelectionResult {
  */
 export const useTextSelection = (
   onSelectionChange: (result: SelectionResult) => void,
-  onError?: () => void
+  onError?: () => void,
 ): void => {
   useEffect(() => {
     const handleMouseUp = () => {
       const selection = window.getSelection();
-      
+
       if (!selection || selection.toString().trim() === '') {
         return;
       }
@@ -36,19 +36,18 @@ export const useTextSelection = (
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         const highlightedElement = createHighlight(range);
-        
+
         if (highlightedElement) {
           const position = getHighlightPosition(highlightedElement);
-          
+
           onSelectionChange({
             highlight: highlightedElement,
             position,
           });
         } else {
-          // 하이라이트 실패 시 에러 콜백 호출
           onError?.();
         }
-        
+
         selection.removeAllRanges();
       }
     };
@@ -57,6 +56,11 @@ export const useTextSelection = (
 
     return () => {
       document.removeEventListener('mouseup', handleMouseUp);
+
+      const existingHighlight = document.querySelector(`.${HIGHLIGHT.CLASS_NAME}`);
+      if (existingHighlight) {
+        removeHighlight(existingHighlight as HTMLElement);
+      }
     };
   }, [onSelectionChange, onError]);
 };
