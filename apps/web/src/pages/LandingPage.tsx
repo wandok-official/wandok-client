@@ -11,6 +11,19 @@ interface UserProfile {
   picture: string;
 }
 
+// 공통 스타일 유틸리티
+const styles = {
+  transition: 'transition-colors duration-300',
+  transitionAll: 'transition-all duration-300',
+  textPrimary: (isDarkMode: boolean) => isDarkMode ? 'text-white' : 'text-gray-900',
+  textMuted: (isDarkMode: boolean) => isDarkMode ? 'text-gray-400' : 'text-gray-600',
+  textSecondary: (isDarkMode: boolean) => isDarkMode ? 'text-gray-300' : 'text-gray-600',
+  textHeading: (isDarkMode: boolean) => isDarkMode ? 'text-white' : 'text-black',
+  bgCard: (isDarkMode: boolean) => isDarkMode ? 'bg-gray-800' : 'bg-white',
+  bgSecondary: (isDarkMode: boolean) => isDarkMode ? 'bg-gray-700' : 'bg-gray-50',
+  bgPage: (isDarkMode: boolean) => isDarkMode ? 'bg-gray-900' : 'bg-gray-50',
+};
+
 interface LoginFormProps {
   isDarkMode: boolean;
   onLogin: () => void;
@@ -22,16 +35,16 @@ function LoginForm({ isDarkMode, onLogin }: LoginFormProps) {
       <h2
         className={`
           text-2xl font-bold text-center
-          transition-colors duration-300
-          ${isDarkMode ? 'text-white' : 'text-gray-900'}
+          ${styles.transition}
+          ${styles.textPrimary(isDarkMode)}
         `}
       >
         시작하기
       </h2>
       <p
         className={`
-          text-center text-sm transition-colors duration-300
-          ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+          text-center text-sm ${styles.transition}
+          ${styles.textMuted(isDarkMode)}
         `}
       >
         구글 계정으로 간편하게 로그인하세요
@@ -40,7 +53,7 @@ function LoginForm({ isDarkMode, onLogin }: LoginFormProps) {
         onClick={onLogin}
         className={`
           w-full px-6 py-3 rounded-lg
-          transition-all duration-300
+          ${styles.transitionAll}
           flex items-center justify-center gap-3
           ${isDarkMode
             ? 'bg-gray-700 border border-gray-600'
@@ -71,8 +84,8 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
       <h2
         className={`
           text-2xl font-bold text-center
-          transition-colors duration-300
-          ${isDarkMode ? 'text-white' : 'text-gray-900'}
+          ${styles.transition}
+          ${styles.textPrimary(isDarkMode)}
         `}
       >
         환영합니다!
@@ -88,16 +101,16 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
           <div className="text-center">
             <p
               className={`
-                font-semibold transition-colors duration-300
-                ${isDarkMode ? 'text-white' : 'text-gray-900'}
+                font-semibold ${styles.transition}
+                ${styles.textPrimary(isDarkMode)}
               `}
             >
               {userProfile.name}
             </p>
             <p
               className={`
-                text-sm transition-colors duration-300
-                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+                text-sm ${styles.transition}
+                ${styles.textMuted(isDarkMode)}
               `}
             >
               {userProfile.email}
@@ -108,8 +121,8 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
 
       <div
         className={`
-          rounded-lg p-4 transition-colors duration-300
-          ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}
+          rounded-lg p-4 ${styles.transition}
+          ${styles.bgSecondary(isDarkMode)}
         `}
       >
         <div className="grid grid-cols-3 gap-4 text-center">
@@ -117,7 +130,7 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             <p
               className={`
                 text-2xl font-bold
-                transition-colors duration-300
+                ${styles.transition}
                 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}
               `}
             >
@@ -125,8 +138,8 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             </p>
             <p
               className={`
-                text-xs transition-colors duration-300
-                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+                text-xs ${styles.transition}
+                ${styles.textMuted(isDarkMode)}
               `}
             >
               읽은 문서
@@ -136,7 +149,7 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             <p
               className={`
                 text-2xl font-bold
-                transition-colors duration-300
+                ${styles.transition}
                 ${isDarkMode ? 'text-green-400' : 'text-green-600'}
               `}
             >
@@ -144,8 +157,8 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             </p>
             <p
               className={`
-                text-xs transition-colors duration-300
-                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+                text-xs ${styles.transition}
+                ${styles.textMuted(isDarkMode)}
               `}
             >
               읽는 중
@@ -155,7 +168,7 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             <p
               className={`
                 text-2xl font-bold
-                transition-colors duration-300
+                ${styles.transition}
                 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}
               `}
             >
@@ -163,8 +176,8 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
             </p>
             <p
               className={`
-                text-xs transition-colors duration-300
-                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+                text-xs ${styles.transition}
+                ${styles.textMuted(isDarkMode)}
               `}
             >
               독서 시간
@@ -177,7 +190,7 @@ function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps
         onClick={onLogout}
         className={`
           w-full px-6 py-3 rounded-lg
-          transition-all duration-300
+          ${styles.transitionAll}
           ${isDarkMode
             ? 'bg-red-900 hover:bg-red-800'
             : 'bg-red-600 hover:bg-red-700'
@@ -228,15 +241,15 @@ function LandingPage() {
   return (
     <div
       className={`
-        min-h-screen transition-colors duration-300
-        ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}
+        min-h-screen ${styles.transition}
+        ${styles.bgPage(isDarkMode)}
       `}
     >
       <button
         onClick={toggleDarkMode}
         className={`
           fixed top-6 right-6 p-3 rounded-full shadow-lg
-          transition-all duration-300
+          ${styles.transitionAll}
           ${isDarkMode
             ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
             : 'bg-white text-gray-700 hover:bg-gray-100'
@@ -252,24 +265,24 @@ function LandingPage() {
           <div className="text-center mb-16">
             <p
               className={`
-                text-sm mb-2 transition-colors duration-300
-                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+                text-sm mb-2 ${styles.transition}
+                ${styles.textMuted(isDarkMode)}
               `}
             >
               완벽한 독서 경험
             </p>
             <h1
               className={`
-                text-6xl font-bold mb-4 transition-colors duration-300
-                ${isDarkMode ? 'text-white' : 'text-black'}
+                text-6xl font-bold mb-4 ${styles.transition}
+                ${styles.textHeading(isDarkMode)}
               `}
             >
               완독이
             </h1>
             <p
               className={`
-                text-lg transition-colors duration-300
-                ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}
+                text-lg ${styles.transition}
+                ${styles.textSecondary(isDarkMode)}
               `}
             >
               크롬 익스텐션으로 당신의 독서 여정을 추적하세요
@@ -280,8 +293,8 @@ function LandingPage() {
             <div className="space-y-6">
               <h2
                 className={`
-                  text-2xl font-bold mb-6 transition-colors duration-300
-                  ${isDarkMode ? 'text-white' : 'text-gray-900'}
+                  text-2xl font-bold mb-6 ${styles.transition}
+                  ${styles.textPrimary(isDarkMode)}
                 `}
               >
                 인터랙티브 데모
@@ -294,8 +307,8 @@ function LandingPage() {
               <div
                 className={`
                   rounded-lg shadow-xl p-8 w-full max-w-md
-                  transition-colors duration-300
-                  ${isDarkMode ? 'bg-gray-800' : 'bg-white'}
+                  ${styles.transition}
+                  ${styles.bgCard(isDarkMode)}
                 `}
               >
                 {!isLoggedIn ? (
