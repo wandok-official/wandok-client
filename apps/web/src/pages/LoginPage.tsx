@@ -337,6 +337,186 @@ function MoonIcon() {
 }
 
 
+interface LoginFormProps {
+  isDarkMode: boolean;
+  onLogin: () => void;
+}
+
+function LoginForm({ isDarkMode, onLogin }: LoginFormProps) {
+  return (
+    <div className="space-y-6">
+      <h2
+        className={`
+          text-2xl font-bold text-center
+          transition-colors duration-300
+          ${isDarkMode ? 'text-white' : 'text-gray-900'}
+        `}
+      >
+        시작하기
+      </h2>
+      <p
+        className={`
+          text-center text-sm transition-colors duration-300
+          ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+        `}
+      >
+        구글 계정으로 간편하게 로그인하세요
+      </p>
+      <button
+        onClick={onLogin}
+        className={`
+          w-full px-6 py-3 rounded-lg
+          transition-all duration-300
+          flex items-center justify-center gap-3
+          ${isDarkMode
+            ? 'bg-gray-700 border border-gray-600'
+            : 'bg-white border border-gray-300'
+          }
+          ${isDarkMode
+            ? 'text-gray-200 hover:bg-gray-600'
+            : 'text-gray-700 hover:bg-gray-50'
+          }
+        `}
+      >
+        <GoogleIcon />
+        Sign in with Google
+      </button>
+    </div>
+  );
+}
+
+interface UserDashboardProps {
+  isDarkMode: boolean;
+  userProfile: UserProfile | null;
+  onLogout: () => void;
+}
+
+function UserDashboard({ isDarkMode, userProfile, onLogout }: UserDashboardProps) {
+  return (
+    <div className="space-y-6">
+      <h2
+        className={`
+          text-2xl font-bold text-center
+          transition-colors duration-300
+          ${isDarkMode ? 'text-white' : 'text-gray-900'}
+        `}
+      >
+        환영합니다!
+      </h2>
+
+      {userProfile && (
+        <div className="flex flex-col items-center space-y-4">
+          <img
+            src={userProfile.picture}
+            alt={userProfile.name}
+            className="w-20 h-20 rounded-full"
+          />
+          <div className="text-center">
+            <p
+              className={`
+                font-semibold transition-colors duration-300
+                ${isDarkMode ? 'text-white' : 'text-gray-900'}
+              `}
+            >
+              {userProfile.name}
+            </p>
+            <p
+              className={`
+                text-sm transition-colors duration-300
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+              `}
+            >
+              {userProfile.email}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div
+        className={`
+          rounded-lg p-4 transition-colors duration-300
+          ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}
+        `}
+      >
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p
+              className={`
+                text-2xl font-bold
+                transition-colors duration-300
+                ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}
+              `}
+            >
+              12
+            </p>
+            <p
+              className={`
+                text-xs transition-colors duration-300
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+              `}
+            >
+              읽은 문서
+            </p>
+          </div>
+          <div>
+            <p
+              className={`
+                text-2xl font-bold
+                transition-colors duration-300
+                ${isDarkMode ? 'text-green-400' : 'text-green-600'}
+              `}
+            >
+              3
+            </p>
+            <p
+              className={`
+                text-xs transition-colors duration-300
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+              `}
+            >
+              읽는 중
+            </p>
+          </div>
+          <div>
+            <p
+              className={`
+                text-2xl font-bold
+                transition-colors duration-300
+                ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}
+              `}
+            >
+              48h
+            </p>
+            <p
+              className={`
+                text-xs transition-colors duration-300
+                ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
+              `}
+            >
+              독서 시간
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={onLogout}
+        className={`
+          w-full px-6 py-3 rounded-lg
+          transition-all duration-300
+          ${isDarkMode
+            ? 'bg-red-900 hover:bg-red-800'
+            : 'bg-red-600 hover:bg-red-700'
+          }
+          text-white
+        `}
+      >
+        로그아웃
+      </button>
+    </div>
+  );
+}
+
 function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -445,166 +625,13 @@ function LoginPage() {
                 `}
               >
                 {!isLoggedIn ? (
-                  <div className="space-y-6">
-                    <h2
-                      className={`
-                        text-2xl font-bold text-center
-                        transition-colors duration-300
-                        ${isDarkMode ? 'text-white' : 'text-gray-900'}
-                      `}
-                    >
-                      시작하기
-                    </h2>
-                    <p
-                      className={`
-                        text-center text-sm transition-colors duration-300
-                        ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
-                      `}
-                    >
-                      구글 계정으로 간편하게 로그인하세요
-                    </p>
-                    <button
-                      onClick={handleGoogleLogin}
-                      className={`
-                        w-full px-6 py-3 rounded-lg
-                        transition-all duration-300
-                        flex items-center justify-center gap-3
-                        ${isDarkMode
-                          ? 'bg-gray-700 border border-gray-600'
-                          : 'bg-white border border-gray-300'
-                        }
-                        ${isDarkMode
-                          ? 'text-gray-200 hover:bg-gray-600'
-                          : 'text-gray-700 hover:bg-gray-50'
-                        }
-                      `}
-                    >
-                      <GoogleIcon />
-                      Sign in with Google
-                    </button>
-                  </div>
+                  <LoginForm isDarkMode={isDarkMode} onLogin={handleGoogleLogin} />
                 ) : (
-                  <div className="space-y-6">
-                    <h2
-                      className={`
-                        text-2xl font-bold text-center
-                        transition-colors duration-300
-                        ${isDarkMode ? 'text-white' : 'text-gray-900'}
-                      `}
-                    >
-                      환영합니다!
-                    </h2>
-
-                    {userProfile && (
-                      <div className="flex flex-col items-center space-y-4">
-                        <img
-                          src={userProfile.picture}
-                          alt={userProfile.name}
-                          className="w-20 h-20 rounded-full"
-                        />
-                        <div className="text-center">
-                          <p
-                            className={`
-                              font-semibold transition-colors duration-300
-                              ${isDarkMode ? 'text-white' : 'text-gray-900'}
-                            `}
-                          >
-                            {userProfile.name}
-                          </p>
-                          <p
-                            className={`
-                              text-sm transition-colors duration-300
-                              ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
-                            `}
-                          >
-                            {userProfile.email}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div
-                      className={`
-                        rounded-lg p-4 transition-colors duration-300
-                        ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}
-                      `}
-                    >
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <p
-                            className={`
-                              text-2xl font-bold
-                              transition-colors duration-300
-                              ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}
-                            `}
-                          >
-                            12
-                          </p>
-                          <p
-                            className={`
-                              text-xs transition-colors duration-300
-                              ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
-                            `}
-                          >
-                            읽은 문서
-                          </p>
-                        </div>
-                        <div>
-                          <p
-                            className={`
-                              text-2xl font-bold
-                              transition-colors duration-300
-                              ${isDarkMode ? 'text-green-400' : 'text-green-600'}
-                            `}
-                          >
-                            3
-                          </p>
-                          <p
-                            className={`
-                              text-xs transition-colors duration-300
-                              ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
-                            `}
-                          >
-                            읽는 중
-                          </p>
-                        </div>
-                        <div>
-                          <p
-                            className={`
-                              text-2xl font-bold
-                              transition-colors duration-300
-                              ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}
-                            `}
-                          >
-                            48h
-                          </p>
-                          <p
-                            className={`
-                              text-xs transition-colors duration-300
-                              ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}
-                            `}
-                          >
-                            독서 시간
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleLogout}
-                      className={`
-                        w-full px-6 py-3 rounded-lg
-                        transition-all duration-300
-                        ${isDarkMode
-                          ? 'bg-red-900 hover:bg-red-800'
-                          : 'bg-red-600 hover:bg-red-700'
-                        }
-                        text-white
-                      `}
-                    >
-                      로그아웃
-                    </button>
-                  </div>
+                  <UserDashboard
+                    isDarkMode={isDarkMode}
+                    userProfile={userProfile}
+                    onLogout={handleLogout}
+                  />
                 )}
               </div>
             </div>
