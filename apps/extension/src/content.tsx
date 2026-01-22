@@ -1,10 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import { PROGRESS_BAR, POPOVER, BLOCK_SELECTOR } from './config/constants';
+import { POPOVER, BLOCK_SELECTOR } from './config/constants';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
 import { applyBlurEffect } from './utils/applyBlurEffect';
-import { getParagraphComplexities } from './utils/getParagraphComplexities';
 import { App } from './components/App';
 import contentCss from '../public/content.css?inline';
 
@@ -19,10 +18,7 @@ const getClosestBlock = (el: HTMLElement): HTMLElement | null => {
 };
 
 const initFocusMode = () => {
-  /* Progress Bar Setup */
-  document.body.style.paddingRight = PROGRESS_BAR.WIDTH;
-  document.body.style.boxSizing = 'border-box';
-
+  /* Shadow DOM Setup for React Components */
   const shadowHost = document.createElement('div');
   shadowHost.id = 'wandok-shadow-host';
   document.body.appendChild(shadowHost);
@@ -53,11 +49,8 @@ const initFocusMode = () => {
   const rootElement = document.createElement('div');
   shadowRoot.appendChild(rootElement);
 
-  // 페이지 로드 시 복잡도 점수 계산
-  const complexityScores = getParagraphComplexities();
-
   const root = createRoot(rootElement);
-  root.render(<App complexityScores={complexityScores} />);
+  root.render(<App />);
 
   /* Text Blur + Split Paragraph Logic */
   const textNodes = extractTextNodes(document.body);
