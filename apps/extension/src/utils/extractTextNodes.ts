@@ -1,6 +1,8 @@
 export const extractTextNodes = (
   root: HTMLElement,
-  excludeTags: string[] = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'],
+  excludeTags: string[] = [
+    'SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT', 'BUTTON', 'A', 'LABEL', 'SUMMARY',
+  ],
 ): Text[] => {
   if (!root) return [];
 
@@ -9,7 +11,7 @@ export const extractTextNodes = (
     NodeFilter.SHOW_TEXT,
     {
       acceptNode: (node: Node) => {
-        if (node.parentElement && excludeTags.includes(node.parentElement.tagName)) {
+        if (node.parentElement && node.parentElement.closest(excludeTags.join(','))) {
           return NodeFilter.FILTER_REJECT;
         }
 
@@ -17,7 +19,6 @@ export const extractTextNodes = (
           return NodeFilter.FILTER_REJECT;
         }
 
-        // 이미 wandok-text-wrapper로 처리된 요소 안의 텍스트는 제외
         if (node.parentElement?.classList.contains('wandok-text-wrapper')) {
           return NodeFilter.FILTER_REJECT;
         }

@@ -1,5 +1,5 @@
 export const PROGRESS_BAR = {
-  WIDTH: '100px',
+  WIDTH: '10px',
 } as const;
 
 export const HIGHLIGHT = {

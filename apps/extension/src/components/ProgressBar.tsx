@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef,useState } from 'react';
+
 import { PROGRESS_BAR } from '../config/constants';
 import { getScrollPercentage } from '../utils/getScrollPercentage';
-import type { ComplexityData } from '../types/complexity';
-import { useComplexityChartData } from '../hooks/useComplexityChartData';
-import { ComplexityChart } from './ComplexityChart';
 
-export const ProgressBar = ({ complexityScores = [] }: Partial<ComplexityData>) => {
+export const ProgressBar = () => {
   const [scrollPercent, setScrollPercent] = useState(0);
   const rafIdRef = useRef<number | null>(null);
 
@@ -34,14 +32,15 @@ export const ProgressBar = ({ complexityScores = [] }: Partial<ComplexityData>) 
     };
   }, []);
 
-  const chartData = useComplexityChartData({ complexityScores, scrollPercent });
-
   return (
     <div
-      className="fixed top-0 right-0 h-screen"
+      className="fixed top-0 right-0 h-screen bg-gray-200 z-[2147483646]"
       style={{ width: PROGRESS_BAR.WIDTH }}
     >
-      <ComplexityChart {...chartData} />
+      <div
+        className="bg-amber-500 w-full transition-all duration-100 ease-out"
+        style={{ height: `${scrollPercent}%` }}
+      />
     </div>
   );
 };
