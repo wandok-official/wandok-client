@@ -1,4 +1,5 @@
 export const computeComplexity = (text: string): number => {
+  if (!text) return 0;
   const trimmed = text.trim();
   if (!trimmed) return 0;
 
@@ -10,7 +11,7 @@ export const computeComplexity = (text: string): number => {
 };
 
 export const normalizeScores = (scores: number[]): number[] => {
-  if (scores.length === 0) return [];
+  if (!scores || scores.length === 0) return [];
 
   const min = Math.min(...scores);
   const max = Math.max(...scores);
