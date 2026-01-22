@@ -1,11 +1,12 @@
 import { createRoot } from 'react-dom/client';
-import { POPOVER, BLOCK_SELECTOR } from './config/constants';
+
+import contentCss from '../public/content.css?inline';
+import { App } from './components/App';
+import { BLOCK_SELECTOR,POPOVER } from './config/constants';
+import { applyBlurEffect } from './utils/applyBlurEffect';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
-import { applyBlurEffect } from './utils/applyBlurEffect';
-import { App } from './components/App';
-import contentCss from '../public/content.css?inline';
 
 // 관리 대상 문단들을 저장할 Set
 const allBlockElements = new Set<HTMLElement>();
@@ -21,6 +22,34 @@ const getClosestBlock = (el: HTMLElement): HTMLElement | null => {
 };
 
 /**
+ * 화이트리스트: 본문 콘텐츠 영역
+ *
+ * Brunch: .wrap_body, #ArticleView
+ * Velog: .atom-one
+ */
+const CONTENT_SELECTORS =
+  'article, main, [role="main"], .post-content, .article-body, ' +
+  '.wrap_body, #ArticleView, .atom-one';
+
+/**
+ * 블랙리스트: 인터랙티브/동적 요소
+ */
+const EXCLUDED_SELECTORS = 'button, a, [onclick], [role="button"], nav, header, footer';
+
+/**
+ * 요소가 처리 대상인지 확인하는 헬퍼 함수
+ * - 본문 콘텐츠 영역 안에 있어야 함
+ * - 인터랙티브 요소 안에 있으면 제외
+ */
+const isArticleContent = (element: HTMLElement): boolean => {
+  if (!element.closest(CONTENT_SELECTORS)) return false;
+
+  if (element.closest(EXCLUDED_SELECTORS)) return false;
+
+  return true;
+};
+
+/**
  * 텍스트 노드를 문장 단위로 분리하고 이벤트 핸들러를 등록하는 함수
  */
 const processTextNode = (textNode: Node) => {
@@ -33,6 +62,9 @@ const processTextNode = (textNode: Node) => {
 
   // Shadow DOM 내부의 요소는 처리하지 않음
   if (initialParent.closest('#wandok-shadow-host')) return;
+
+  // 본문 콘텐츠 영역 외의 요소는 처리하지 않음
+  if (!isArticleContent(textNode.parentElement as HTMLElement)) return;
 
   allBlockElements.add(initialParent);
 
@@ -111,11 +143,11 @@ const initFocusMode = () => {
       pointer-events: none;
       z-index: ${POPOVER.Z_INDEX};
     }
-    
+
     .${POPOVER.INTERACTIVE_CLASS} {
       pointer-events: auto;
     }
-    
+
     ${contentCss}
   `;
   shadowRoot.appendChild(shadowStyle);
