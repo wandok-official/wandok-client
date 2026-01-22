@@ -1,7 +1,9 @@
 export const extractTextNodes = (
   root: HTMLElement,
-  excludeTags: string[] = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT']
+  excludeTags: string[] = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'],
 ): Text[] => {
+  if (!root) return [];
+
   const treeWalker = document.createTreeWalker(
     root,
     NodeFilter.SHOW_TEXT,
@@ -17,7 +19,7 @@ export const extractTextNodes = (
 
         return NodeFilter.FILTER_ACCEPT;
       },
-    }
+    },
   );
 
   const textNodes: Text[] = [];

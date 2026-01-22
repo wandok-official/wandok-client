@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./apps/extension/src/*"],
+      "@test/*": ["./test/*"]
+    }
+  },
+  "include": [
+    "apps/extension/src/**/*.test.ts",
+    "apps/extension/src/**/*.test.tsx",
+    "apps/extension/src/**/__tests__/**/*.ts",
+    "apps/extension/src/**/__tests__/**/*.tsx",
+    "test/**/*.ts"
+  ]
+}

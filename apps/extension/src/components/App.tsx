@@ -1,26 +1,11 @@
-import { useState } from 'react';
-import { ProgressBar } from './ProgressBar';
-import { TextHighlightManager } from './TextHighlightManager';
-import { Toast } from './Toast';
-import type { ComplexityData } from '../types/complexity';
-
-export const App = ({ complexityScores = [] }: Partial<ComplexityData>) => {
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const handleHighlightError = () => {
-    setToastMessage('동일한 종류의 텍스트만 하이라이트 가능합니다');
-  };
-
-  return (
-    <>
-      <ProgressBar complexityScores={complexityScores} />
-      <TextHighlightManager onHighlightError={handleHighlightError} />
-      {toastMessage && (
-        <Toast 
-          message={toastMessage} 
-          onClose={() => setToastMessage(null)} 
-        />
-      )}
-    </>
-  );
+/**
+ * Extension의 메인 앱 컴포넌트
+ * 현재는 포커스 모드(blur, 문단 분리)만 제공
+ * 
+ * 제외된 기능 (향후 추가 예정):
+ * - Complexity 기반 Progress Bar (스크롤 난이도 표시)
+ * - 드래그 하이라이트 메모 기능
+ */
+export const App = () => {
+  return null;
 };
