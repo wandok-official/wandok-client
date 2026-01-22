@@ -1,7 +1,7 @@
 export const WelcomeCard = () => {
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6 border border-amber-200">
+      <div className="bg-white rounded-xl shadow-lg p-6 border border-amber-200 mb-15">
         <p className="text-lg font-medium text-gray-800 mb-4">
           익스텐션이 설치되었습니다!
         </p>
