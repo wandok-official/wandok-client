@@ -39,7 +39,7 @@ export const useComplexityChartData = ({
 
 const interpolatePoints = (
   allPoints: { x: number; y: number }[],
-  scrollPosition: number
+  scrollPosition: number,
 ) => {
   const readPointsArr: { x: number; y: number }[] = [];
   const unreadPointsArr: { x: number; y: number }[] = [];
@@ -71,7 +71,7 @@ const interpolatePoints = (
 const createPointsString = (
   points: { x: number; y: number }[],
   width: number,
-  closePath: boolean
+  closePath: boolean,
 ) => {
   if (points.length === 0) return '';
   const pointStr = points.map(p => `${p.x},${p.y}`).join(' ');

@@ -5,7 +5,7 @@ import { computeComplexity, normalizeScores } from './complexity';
  * 문단 블록(HTMLElement[])을 받아 progress bar용 세그먼트로 변환
  */
 export const buildProgressSegments = (
-  blocks: HTMLElement[]
+  blocks: HTMLElement[],
 ): ProgressSegment[] => {
   if (blocks.length === 0) return [];
 
@@ -17,7 +17,7 @@ export const buildProgressSegments = (
   });
 
   const tops = orderedBlocks.map(
-    (el) => el.getBoundingClientRect().top + window.scrollY
+    (el) => el.getBoundingClientRect().top + window.scrollY,
   );
 
   const docHeight = document.documentElement.scrollHeight;
@@ -25,7 +25,7 @@ export const buildProgressSegments = (
   const scrollable = Math.max(1, docHeight - winHeight);
 
   const rawScores = orderedBlocks.map((el) =>
-    computeComplexity(el.innerText ?? '')
+    computeComplexity(el.innerText ?? ''),
   );
   const intensities = normalizeScores(rawScores);
 
@@ -36,12 +36,12 @@ export const buildProgressSegments = (
 
     const topPct = Math.min(
       100,
-      Math.max(0, (startY / scrollable) * 100)
+      Math.max(0, (startY / scrollable) * 100),
     );
 
     const heightPct = Math.min(
       100 - topPct,
-      Math.max(0.4, ((endY - startY) / scrollable) * 100)
+      Math.max(0.4, ((endY - startY) / scrollable) * 100),
     );
 
     return {

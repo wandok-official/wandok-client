@@ -14,7 +14,7 @@ function InteractiveDemo({ isDarkMode }: InteractiveDemoProps) {
 
   const handleToggleParagraph = (
     paragraphIndex: number,
-    sentenceIndex: number
+    sentenceIndex: number,
   ) => {
     setParagraphs((prev) => {
       const newParagraphs = [...prev];
