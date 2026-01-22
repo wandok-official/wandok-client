@@ -13,13 +13,22 @@ interface GuideStepData {
   infoMessage: string;
 }
 
+/**
+ * 텍스트를 문단으로 분리하여 렌더링
+ * 문장 분리는 Extension이 자동으로 처리하므로, 여기서는 문단만 나누고 문장 사이에 공백만 보장
+ */
 const renderParagraphs = (content: string) => {
   return content
     .trim()
     .split(/\n\s*\n/)
-    .map((paragraph, index) => (
-      <p key={index}>{paragraph.replace(/\s*\n\s*/g, ' ')}</p>
-    ));
+    .filter((p) => p.trim())
+    .map((paragraph, pIndex) => {
+      // 문단 내 줄바꿈을 공백으로 치환
+      // 문장 분리는 Extension의 segmentSentences가 처리
+      const paragraphText = paragraph.replace(/\s*\n\s*/g, ' ').trim();
+
+      return <p key={pIndex}>{paragraphText}</p>;
+    });
 };
 
 export const GUIDE_STEPS: GuideStepData[] = [

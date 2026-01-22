@@ -141,6 +141,13 @@ const initFocusMode = () => {
           if (element.id === 'wandok-shadow-host') return;
           if (element.closest('#wandok-shadow-host')) return;
 
+          // wandok-split-paragraph로 생성된 요소는 무시 (이미 처리된 span 포함)
+          if (element.classList?.contains('wandok-split-paragraph')) return;
+
+          // 이미 wandok-text-wrapper를 포함한 요소는 무시
+          if (element.classList?.contains('wandok-text-wrapper')) return;
+          if (element.querySelector('.wandok-text-wrapper')) return;
+
           // 새로 추가된 요소 내의 텍스트 처리
           processElement(element);
         }

@@ -17,6 +17,11 @@ export const extractTextNodes = (
           return NodeFilter.FILTER_REJECT;
         }
 
+        // 이미 wandok-text-wrapper로 처리된 요소 안의 텍스트는 제외
+        if (node.parentElement?.classList.contains('wandok-text-wrapper')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+
         return NodeFilter.FILTER_ACCEPT;
       },
     },
