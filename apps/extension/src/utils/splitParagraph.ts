@@ -1,6 +1,11 @@
 export const splitParagraph = (selectedElement: HTMLElement): void => {
-  // 부모 문단 요소 탐색
-  const parentBlock = selectedElement.parentElement;
+  // wandok-text-wrapper인 경우 실제 문단(p, div 등)을 찾아야 함
+  let parentBlock = selectedElement.parentElement;
+  
+  // wandok-text-wrapper의 부모가 또 다른 wandok-text-wrapper인 경우 건너뛰기
+  while (parentBlock && parentBlock.classList.contains('wandok-text-wrapper')) {
+    parentBlock = parentBlock.parentElement;
+  }
 
   // 부모가 없거나 body인 경우 문서 전체 구조 깨짐 방지를 위해 중단
   if (!parentBlock || parentBlock === document.body) return;
