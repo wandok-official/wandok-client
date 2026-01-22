@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 export const useClickOutsideClassName = (
   isEnabled: boolean,
   className: string,
-  onClickOutside: () => void
+  onClickOutside: () => void,
 ): void => {
   useEffect(() => {
     if (!isEnabled) return;
@@ -13,7 +13,7 @@ export const useClickOutsideClassName = (
       const isClickInsideElement = path.some(
         (element) =>
           element instanceof HTMLElement &&
-          element.classList?.contains(className)
+          element.classList?.contains(className),
       );
 
       if (!isClickInsideElement) {

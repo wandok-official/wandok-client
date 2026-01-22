@@ -13,7 +13,7 @@ import type { Position } from '../types/position';
 export const useHighlightScroll = (
   isEnabled: boolean,
   highlightElement: HTMLElement | null,
-  onPositionUpdate: (position: Position) => void
+  onPositionUpdate: (position: Position) => void,
 ): void => {
   useEffect(() => {
     if (!isEnabled || !highlightElement) return;

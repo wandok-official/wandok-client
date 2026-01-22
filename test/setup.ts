@@ -2,7 +2,7 @@
 import { vi, beforeAll, afterAll, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/dom';
-import '@testing-library/jest-dom/vitest';
+// import '@testing-library/jest-dom'; // TODO: 패키지 설치 필요
 
 import { mockChrome } from './mocks/chrome';
 
