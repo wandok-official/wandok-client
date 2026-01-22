@@ -7,12 +7,46 @@ describe('computeComplexity', () => {
 
   describe('정상 케이스 (Happy Path)', () => {
     it('일반적인 텍스트의 복잡도를 계산해야 한다.', () => {
-      // 길이(5) + 구두점(0) + 숫자(0)
-      expect(computeComplexity('hello')).toBe(5);
-      // 길이(12) + 구두점(20) + 숫자(0)
-      expect(computeComplexity('hello, world')).toBe(12 + 20);
-      // 길이(6) + 구두점(0) + 숫자(10)
-      expect(computeComplexity('hello2')).toBe(6 + 10);
+      // 'hello': 길이(5) + 문장수(1)*10 + 평균(5)*0.2 = 16
+      expect(computeComplexity('hello')).toBe(16);
+      
+      // 'hello, world': 길이(12) + 문장수(1)*10 + 평균(12)*0.2 + 콤마(1)*2 = 26.4
+      expect(computeComplexity('hello, world')).toBe(26.4);
+      
+      // 'hello2': 길이(6) + 문장수(1)*10 + 평균(6)*0.2 + 숫자(1)*3 = 20.2
+      expect(computeComplexity('hello2')).toBe(20.2);
+    });
+
+    it('문장이 많을수록 복잡도가 높아야 한다.', () => {
+      const oneSentence = '이것은 한 문장입니다.';
+      const threeSentences = '첫 문장. 둘째 문장. 셋째 문장.';
+      
+      const score1 = computeComplexity(oneSentence);
+      const score3 = computeComplexity(threeSentences);
+      
+      // 문장 수가 많으면 복잡도가 높아야 함
+      expect(score3).toBeGreaterThan(score1);
+    });
+
+    it('복잡한 구두점이 있으면 복잡도가 높아야 한다.', () => {
+      const simple = '간단한 문장입니다.';
+      const complex = '복잡한 문장입니다: (예시) [테스트].';
+      
+      const score1 = computeComplexity(simple);
+      const score2 = computeComplexity(complex);
+      
+      expect(score2).toBeGreaterThan(score1);
+    });
+
+    it('긴 텍스트가 짧은 텍스트보다 복잡도가 높아야 한다.', () => {
+      const short = '짧은 제목';
+      const long = '이것은 매우 긴 본문 텍스트입니다. 여러 문장으로 구성되어 있습니다. 복잡도가 높아야 합니다.';
+      
+      const scoreShort = computeComplexity(short);
+      const scoreLong = computeComplexity(long);
+      
+      // 긴 텍스트가 훨씬 높은 복잡도를 가져야 함
+      expect(scoreLong).toBeGreaterThan(scoreShort * 2);
     });
   });
 
@@ -52,7 +86,17 @@ describe('computeComplexity', () => {
   describe('에러 상황 및 복구', () => {
     it('매우 긴 문자열도 정상적으로 처리해야 한다.', () => {
       const longString = 'a'.repeat(10000);
-      expect(computeComplexity(longString)).toBe(10000);
+      // 길이(10000) + 문장수(1)*10 + 평균(10000)*0.2 = 12010
+      expect(computeComplexity(longString)).toBe(12010);
+    });
+
+    it('다양한 문장 부호가 포함된 복잡한 텍스트를 처리해야 한다.', () => {
+      const complexText = '첫 문장입니다. 두번째: (괄호 포함) [대괄호]. 숫자 123, 콤마!';
+      const result = computeComplexity(complexText);
+      
+      // 결과가 숫자이고 0보다 커야 함
+      expect(typeof result).toBe('number');
+      expect(result).toBeGreaterThan(0);
     });
   });
 });
