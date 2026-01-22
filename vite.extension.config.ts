@@ -2,12 +2,17 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import hotReloadExtension from 'hot-reload-extension-vite';
 
 // 익스텐션용 Vite 설정
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    hotReloadExtension({
+      log: true,
+      backgroundPath: resolve(__dirname, 'apps/extension/src/background.ts'),
+    }),
   ],
   build: {
     outDir: 'apps/extension/dist',
