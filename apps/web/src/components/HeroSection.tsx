@@ -1,5 +1,5 @@
-import { WelcomeCard } from './WelcomeCard';
 import { FeatureCard } from './FeatureCard';
+import { WelcomeCard } from './WelcomeCard';
 
 export const HeroSection = () => {
   return (
@@ -8,9 +8,9 @@ export const HeroSection = () => {
         bg-gradient-to-b from-amber-50 to-white px-4"
     >
       <div className="text-center max-w-2xl">
-        <p className="text-amber-600 font-medium mb-2 mt-10">완벽한 독서 경험</p>
+        <p className="text-amber-600 font-medium mb-2 mt-25">완벽한 독서 경험</p>
         <h1 className="text-6xl font-bold text-gray-900 mb-4 mt-5">완독이</h1>
-        <p className="text-lg text-gray-600 mb-15 mt-5">
+        <p className="text-lg text-gray-600 mb-20 mt-5">
           글을 읽는 새로운 방법
         </p>
         <WelcomeCard />
@@ -36,7 +36,7 @@ export const HeroSection = () => {
 
       <div className="mt-12 text-center">
         <p className="text-gray-500 text-sm mb-2 mt-35">↓</p>
-        <p className="text-amber-600 font-medium mb-35">
+        <p className="text-amber-600 font-medium mb-55">
           확장 프로그램을 실행한 뒤 스크롤을 해보세요!
         </p>
       </div>

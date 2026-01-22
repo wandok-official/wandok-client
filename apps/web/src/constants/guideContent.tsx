@@ -39,7 +39,7 @@ export const GUIDE_STEPS: GuideStepData[] = [
     completedMessage: '✅ 완료! 포커스 모드를 체험했습니다.',
     bgColor: 'gray',
     content: <>{renderParagraphs(step1Content)}</>,
-    infoMessage: '텍스트에 마우스를 올리면 해당 부분이 강조됩니다. 그 순간을 이용해 문장을 끝까지 따라가 보세요.',
+    infoMessage: '텍스트에 마우스를 올리면 해당 부분이 강조됩니다.',
   },
   {
     stepNumber: 2,
