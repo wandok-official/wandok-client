@@ -1,18 +1,18 @@
 import js from '@eslint/js';
-import globals from 'globals';
 import stylistic from '@stylistic/eslint-plugin';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import eslintPluginReact from 'eslint-plugin-react';
 import eslintPluginReactHooks from 'eslint-plugin-react-hooks';
 import eslintPluginReactRefresh from 'eslint-plugin-react-refresh';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   /* =========================================
      [1] 전역 무시 설정
   ========================================= */
   globalIgnores(['apps/extension/dist', 'node_modules']),
-
 
   /* =========================================
      [2] 모든 파일에 적용되는 전역 설정
@@ -26,7 +26,6 @@ export default defineConfig([
       '@stylistic/eol-last': ['error', 'always'],
     },
   },
-
 
   /* =========================================
      [3] 공통 설정 (JS, TS 모두 적용)
@@ -48,6 +47,7 @@ export default defineConfig([
 
     plugins: {
       '@stylistic': stylistic,
+      'simple-import-sort': simpleImportSort,
     },
 
     rules: {
@@ -64,13 +64,16 @@ export default defineConfig([
         'functions': 'always-multiline',
       }],
 
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
+
+      'no-multiple-empty-lines': ['error', { 'max': 1, 'maxEOF': 1 }],
       'no-var': 'error',
       'prefer-const': 'error',
       'no-console': 'warn',
       'no-empty': 'warn',
     },
   },
-
 
   /* =========================================
      [4] TypeScript 및 React 전용 설정
@@ -115,7 +118,6 @@ export default defineConfig([
         'warn',
         { prefer: 'type-imports' },
       ],
-
 
       /* React / Hooks / Refresh */
       ...eslintPluginReact.configs.flat.recommended.rules,
