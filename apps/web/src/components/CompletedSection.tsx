@@ -5,16 +5,16 @@ const LEARNED_FEATURES = [
 ];
 
 const RECOMMENDED_SITES = [
-  { name: '브런치', url: 'https://brunch.co.kr' },
-  { name: '미디엄', url: 'https://medium.com' },
+  { name: '완독이', url: 'https://github.com/wandok-official/wandok-client' },
   { name: '벨로그', url: 'https://velog.io' },
+  { name: '미디엄', url: 'https://medium.com' },
 ];
 
 export const CompletedSection = () => {
   return (
     <section
       className=
-        "min-h-screen py-20 px-4 bg-gradient-to-b from-gray-50 to-amber-50 flex items-center"
+        "min-h-screen py-20 px-4 bg-linear-to-b from-gray-50 to-amber-50 flex items-center"
     >
       <div className="max-w-2xl mx-auto text-center mt-25">
         <div className="text-6xl mb-6">🎉</div>
