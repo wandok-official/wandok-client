@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wandok E2E Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      line-height: 1.8;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    p {
+      margin-bottom: 20px;
+    }
+    .long-content {
+      height: 200vh;
+    }
+  </style>
+</head>
+<body>
+  <article>
+    <h1>Wandok E2E Test Page</h1>
+
+    <p id="paragraph-1">
+      첫 번째 문단입니다. 이 문단은 테스트를 위해 작성되었습니다. 여러 문장이 포함되어 있습니다. 문단 분리 기능을 테스트할 수 있습니다.
+    </p>
+
+    <p id="paragraph-2">
+      두 번째 문단입니다. Focus Mode에서 이 문단에 마우스를 올리면 다른 문단들이 블러 처리됩니다. 이것은 집중 읽기를 돕는 기능입니다.
+    </p>
+
+    <p id="paragraph-3">
+      세 번째 문단입니다. Progress Bar는 현재 스크롤 위치를 표시합니다. 페이지를 스크롤하면 Progress Bar가 업데이트됩니다.
+    </p>
+
+    <div class="long-content">
+      <p id="paragraph-4">
+        네 번째 문단입니다. 스크롤 테스트를 위해 긴 페이지가 필요합니다. 이 문단은 페이지 중간쯤에 위치합니다.
+      </p>
+
+      <p id="paragraph-5" style="margin-top: 50vh;">
+        다섯 번째 문단입니다. 이 문단은 페이지 하단 근처에 있습니다. 스크롤하여 Progress Bar 변화를 확인하세요.
+      </p>
+    </div>
+  </article>
+</body>
+</html>
