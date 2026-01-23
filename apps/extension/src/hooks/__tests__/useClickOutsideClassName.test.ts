@@ -1,13 +1,14 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { useClickOutsideClassName } from '../useClickOutsideClassName';
 import { fireEvent } from '@test/helpers/test-utils';
+import { renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { useClickOutsideClassName } from '../useClickOutsideClassName';
 
 describe('useClickOutsideClassName', () => {
   let container: HTMLElement;
   let targetElement: HTMLElement;
   let outsideElement: HTMLElement;
-  let mockCallback: ReturnType<typeof vi.fn>;
+  let mockCallback: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
     // 테스트용 DOM 구조 생성
@@ -25,7 +26,7 @@ describe('useClickOutsideClassName', () => {
     container.appendChild(targetElement);
     container.appendChild(outsideElement);
 
-    mockCallback = vi.fn();
+    mockCallback = vi.fn<() => void>();
   });
 
   afterEach(() => {

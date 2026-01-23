@@ -1,24 +1,25 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { useHighlightScroll } from '../useHighlightScroll';
 import { fireEvent } from '@test/helpers/test-utils';
 import { createMockElement } from '@test/mocks/dom';
+import { renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { Position } from '../../types/position';
+import { useHighlightScroll } from '../useHighlightScroll';
 
 // getHighlightPosition mock
 vi.mock('../../utils/highlightUtils', () => ({
   getHighlightPosition: vi.fn((element: HTMLElement): Position => {
     const rect = element.getBoundingClientRect();
     return {
-      top: rect.top,
-      left: rect.left,
+      x: rect.left,
+      y: rect.top,
     };
   }),
 }));
 
 describe('useHighlightScroll', () => {
   let highlightElement: HTMLElement;
-  let mockCallback: ReturnType<typeof vi.fn>;
+  let mockCallback: ReturnType<typeof vi.fn<(position: Position) => void>>;
 
   beforeEach(() => {
     highlightElement = createMockElement('span', {
@@ -29,7 +30,7 @@ describe('useHighlightScroll', () => {
     });
     document.body.appendChild(highlightElement);
 
-    mockCallback = vi.fn();
+    mockCallback = vi.fn<(position: Position) => void>();
   });
 
   afterEach(() => {
@@ -50,8 +51,8 @@ describe('useHighlightScroll', () => {
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
       expect(mockCallback).toHaveBeenCalledWith({
-        top: 100,
-        left: 50,
+        x: 50,
+        y: 100,
       });
     });
 
@@ -76,8 +77,8 @@ describe('useHighlightScroll', () => {
 
       expect(mockCallback).toHaveBeenCalledWith(
         expect.objectContaining({
-          top: expect.any(Number),
-          left: expect.any(Number),
+          x: expect.any(Number),
+          y: expect.any(Number),
         }),
       );
     });
@@ -190,14 +191,14 @@ describe('useHighlightScroll', () => {
       );
 
       fireEvent.scroll(window);
-      expect(mockCallback).toHaveBeenCalledWith({ top: 100, left: 50 });
+      expect(mockCallback).toHaveBeenCalledWith({ x: 50, y: 100 });
 
       // 요소 변경
       rerender({ element: newElement });
       mockCallback.mockClear();
 
       fireEvent.scroll(window);
-      expect(mockCallback).toHaveBeenCalledWith({ top: 200, left: 100 });
+      expect(mockCallback).toHaveBeenCalledWith({ x: 100, y: 200 });
 
       document.body.removeChild(newElement);
     });
@@ -251,7 +252,7 @@ describe('useHighlightScroll', () => {
     });
 
     it('콜백 함수가 변경되면 새 콜백을 사용해야 한다', () => {
-      const newCallback = vi.fn();
+      const newCallback = vi.fn<(position: Position) => void>();
 
       const { rerender } = renderHook(
         ({ callback }) =>
