@@ -1,4 +1,5 @@
 import { CompletedSection } from '../components/CompletedSection';
+import { Footer } from '../components/Footer';
 import { GuideBar } from '../components/GuideBar';
 import { GuideStep } from '../components/GuideStep';
 import { HeroSection } from '../components/HeroSection';
@@ -15,31 +16,35 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <HeroSection />
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <HeroSection />
 
-      {extensionState === 'active' && (
-        <>
-          <GuideBar stepStatus={stepStatus} completedCount={completedCount} />
+        {extensionState === 'active' && (
+          <>
+            <GuideBar stepStatus={stepStatus} completedCount={completedCount} />
 
-          {GUIDE_STEPS.map((step) => (
-            <GuideStep
-              key={step.stepNumber}
-              stepNumber={step.stepNumber}
-              title={step.title}
-              completed={isStepCompleted(step.stepNumber)}
-              incompleteMessage={step.incompleteMessage}
-              completedMessage={step.completedMessage}
-              infoMessage={step.infoMessage}
-              bgColor={step.bgColor}
-            >
-              {step.content}
-            </GuideStep>
-          ))}
+            {GUIDE_STEPS.map((step) => (
+              <GuideStep
+                key={step.stepNumber}
+                stepNumber={step.stepNumber}
+                title={step.title}
+                completed={isStepCompleted(step.stepNumber)}
+                incompleteMessage={step.incompleteMessage}
+                completedMessage={step.completedMessage}
+                infoMessage={step.infoMessage}
+                bgColor={step.bgColor}
+              >
+                {step.content}
+              </GuideStep>
+            ))}
 
-          {isGuideComplete && <CompletedSection />}
-        </>
-      )}
+            {isGuideComplete && <CompletedSection />}
+          </>
+        )}
+      </div>
+
+      <Footer />
     </div>
   );
 };

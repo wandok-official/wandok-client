@@ -1,8 +1,15 @@
+import { Footer } from '../components/Footer';
+
 /**
  * 개인정보 처리방침 페이지
  * Chrome Web Store 심사를 위한 필수 문서
  */
 export default function PrivacyPolicyPage() {
+  const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.history.pushState({}, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-8 sm:p-12">
@@ -194,16 +201,19 @@ export default function PrivacyPolicyPage() {
         </section>
 
         {/* 홈으로 돌아가기 */}
-        <footer className="mt-12 pt-6 border-t border-gray-200">
+        <div className="mt-12 pt-6 border-t border-gray-200">
           <a 
             href="/" 
+            onClick={handleHomeClick}
             className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg 
-                     hover:bg-blue-700 transition-colors duration-200"
+                     hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
           >
             ← 홈으로 돌아가기
           </a>
-        </footer>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
