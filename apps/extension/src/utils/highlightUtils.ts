@@ -25,9 +25,8 @@ export function createHighlight(range: Range): HTMLElement | null {
   try {
     range.surroundContents(highlightSpan);
     return highlightSpan;
-  } catch (e) {
+  } catch {
     // surroundContents가 실패할 수 있는 경우 (여러 노드에 걸쳐 선택된 경우 등)
-    console.warn('하이라이트 적용 실패:', e);
     return null;
   }
 }
