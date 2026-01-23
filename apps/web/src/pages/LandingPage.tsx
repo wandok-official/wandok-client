@@ -1,8 +1,8 @@
-import { GUIDE_STEPS } from '../constants/guideContent';
-import { HeroSection } from '../components/HeroSection';
+import { CompletedSection } from '../components/CompletedSection';
 import { GuideBar } from '../components/GuideBar';
 import { GuideStep } from '../components/GuideStep';
-import { CompletedSection } from '../components/CompletedSection';
+import { HeroSection } from '../components/HeroSection';
+import { GUIDE_STEPS } from '../constants/guideContent';
 import { useExtensionState } from '../hooks/useExtensionState';
 import { useGuideProgress } from '../hooks/useGuideProgress';
 
