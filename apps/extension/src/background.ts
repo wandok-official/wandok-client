@@ -1,5 +1,4 @@
-// TODO: 배포 후 실제 랜딩 페이지 URL로 변경 필요
-const LANDING_PAGE_URL = 'http://localhost:5173';
+const LANDING_PAGE_URL = 'https://wandok-client.vercel.app/';
 
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.action.setBadgeText({
