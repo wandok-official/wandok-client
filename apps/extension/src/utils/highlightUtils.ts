@@ -21,12 +21,13 @@ export function removeHighlight(highlightedElement: HTMLElement): void {
 export function createHighlight(range: Range): HTMLElement | null {
   const highlightSpan = document.createElement('span');
   highlightSpan.classList.add(HIGHLIGHT.CLASS_NAME);
-  
+
   try {
     range.surroundContents(highlightSpan);
     return highlightSpan;
   } catch (e) {
     // surroundContents가 실패할 수 있는 경우 (여러 노드에 걸쳐 선택된 경우 등)
+    // eslint-disable-next-line no-console
     console.warn('하이라이트 적용 실패:', e);
     return null;
   }
