@@ -12,7 +12,7 @@ export default defineConfig([
   /* =========================================
      [1] 전역 무시 설정
   ========================================= */
-  globalIgnores(['apps/extension/dist', 'node_modules']),
+  globalIgnores(['**/dist', '**/node_modules', 'playwright-report', 'test-results']),
 
   /* =========================================
      [2] 모든 파일에 적용되는 전역 설정

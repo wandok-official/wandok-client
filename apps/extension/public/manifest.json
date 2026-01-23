@@ -21,5 +21,6 @@
       "128": "logo.png"
     }
   },
-  "permissions": ["activeTab", "scripting"]
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://localhost:*/*"]
 }
