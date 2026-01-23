@@ -3,6 +3,7 @@ import { Footer } from '../components/Footer';
 import { GuideBar } from '../components/GuideBar';
 import { GuideStep } from '../components/GuideStep';
 import { HeroSection } from '../components/HeroSection';
+import { IncompleteSection } from '../components/IncompleteSection';
 import { GUIDE_STEPS } from '../constants/guideContent';
 import { useExtensionState } from '../hooks/useExtensionState';
 import { useGuideProgress } from '../hooks/useGuideProgress';
@@ -40,6 +41,9 @@ const LandingPage = () => {
             ))}
 
             {isGuideComplete && <CompletedSection />}
+            {completedCount > 0 && !isGuideComplete && (
+              <IncompleteSection stepStatus={stepStatus} completedCount={completedCount} />
+            )}
           </>
         )}
       </div>
