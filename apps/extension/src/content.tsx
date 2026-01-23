@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 
 import contentCss from '../public/content.css?inline';
 import { App } from './components/App';
-import { BLOCK_SELECTOR,POPOVER } from './config/constants';
+import { BLOCK_SELECTOR } from './config/constants';
 import { applyBlurEffect } from './utils/applyBlurEffect';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { segmentSentences } from './utils/segmentSentences';
@@ -141,11 +141,7 @@ const initFocusMode = () => {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: ${POPOVER.Z_INDEX};
-    }
-
-    .${POPOVER.INTERACTIVE_CLASS} {
-      pointer-events: auto;
+      z-index: 2147483647;
     }
 
     ${contentCss}

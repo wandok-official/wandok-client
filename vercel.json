@@ -1,6 +1,12 @@
 {
-  "buildCommand": "vite build",
-  "outputDirectory": "apps/web/dist",
-  "installCommand": "npm install",
-  "framework": "vite"
+  "rewrites": [
+    {
+      "source": "/privacy-policy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/privacy-policy.html",
+      "destination": "/index.html"
+    }
+  ]
 }
