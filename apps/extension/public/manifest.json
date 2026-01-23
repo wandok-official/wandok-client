@@ -1,7 +1,7 @@
 {
-  "name": "Wandok",
-  "description": "Perfect Reading Experience Assistant",
-  "version": "1.0",
+  "name": "완독이 (Wandok)",
+  "description": "웹 문서를 집중해서 읽기 위한 도구. 포커스 모드로 문장 강조, 클릭으로 문단 분리.",
+  "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
     "16": "logo.png",
@@ -19,7 +19,22 @@
       "32": "logo.png",
       "48": "logo.png",
       "128": "logo.png"
-    }
+    },
+    "default_title": "완독이 - 포커스 모드 토글"
   },
-  "permissions": ["activeTab", "scripting"]
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
 }
