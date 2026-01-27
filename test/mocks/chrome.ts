@@ -42,7 +42,10 @@ export const mockChrome: Partial<typeof chrome> = {
 
   storage: {
     local: {
-      get: vi.fn().mockResolvedValue({}),
+      get: vi.fn((keys, callback) => {
+        if (callback) callback({});
+        return Promise.resolve({});
+      }),
       set: vi.fn().mockResolvedValue(undefined),
       remove: vi.fn().mockResolvedValue(undefined),
       clear: vi.fn().mockResolvedValue(undefined),
@@ -52,6 +55,10 @@ export const mockChrome: Partial<typeof chrome> = {
       set: vi.fn().mockResolvedValue(undefined),
       remove: vi.fn().mockResolvedValue(undefined),
       clear: vi.fn().mockResolvedValue(undefined),
+    },
+    onChanged: {
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
     },
   },
 };

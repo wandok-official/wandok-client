@@ -5,6 +5,9 @@ chrome.runtime.onInstalled.addListener((details) => {
     text: 'OFF',
   });
 
+  // 초기 상태를 OFF로 설정
+  chrome.storage.local.set({ wandokEnabled: false });
+
   if (details.reason === 'install') {
     chrome.tabs.create({ url: LANDING_PAGE_URL });
   }
@@ -15,23 +18,13 @@ chrome.action.onClicked.addListener(async (tab) => {
 
   const prevState = await chrome.action.getBadgeText({ tabId: tab.id });
   const nextState = prevState === 'ON' ? 'OFF' : 'ON';
+  const isEnabled = nextState === 'ON';
 
   await chrome.action.setBadgeText({
     tabId: tab.id,
     text: nextState,
   });
 
-  if (nextState === 'ON') {
-    await chrome.scripting.insertCSS({
-      target: { tabId: tab.id },
-      files: ['content.css'],
-    });
-
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['content.js'],
-    });
-  } else {
-    chrome.tabs.reload(tab.id);
-  }
+  // storage에 상태 저장
+  await chrome.storage.local.set({ wandokEnabled: isEnabled });
 });
