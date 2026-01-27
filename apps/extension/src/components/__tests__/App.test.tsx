@@ -1,39 +1,84 @@
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '../App';
 
-/**
- * App 컴포넌트 테스트
- */
 describe('App', () => {
-  afterEach(() => {
-    cleanup();
+  let storageChangeListener: (
+    changes: { [key: string]: chrome.storage.StorageChange },
+    areaName: chrome.storage.AreaName,
+  ) => void;
+
+  beforeEach(() => {
+    vi.mocked(chrome.storage.onChanged.addListener).mockImplementation((listener) => {
+      storageChangeListener = listener;
+    });
   });
 
-  describe('정상 케이스', () => {
-    it('App 컴포넌트가 에러 없이 렌더링되어야 한다', () => {
-      expect(() => render(<App />)).not.toThrow();
-    });
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
 
-    it('비활성화 상태일 때 null을 반환해야 한다', () => {
+  describe('초기 상태', () => {
+    it('OFF일 때 ProgressBar가 없어야 한다', () => {
+      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
+        if (callback) callback({ wandokEnabled: false });
+        return Promise.resolve({ wandokEnabled: false });
+      });
+
       const { container } = render(<App />);
       expect(container.firstChild).toBeNull();
     });
-  });
 
-  describe('활성화 상태', () => {
-    beforeEach(() => {
+    it('ON일 때 ProgressBar가 있어야 한다', () => {
       vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
         if (callback) callback({ wandokEnabled: true });
         return Promise.resolve({ wandokEnabled: true });
       });
+
+      const { container } = render(<App />);
+      expect(container.querySelector('.fixed.top-0.right-0')).not.toBeNull();
+    });
+  });
+
+  describe('상태 전환', () => {
+    it('ON → OFF 전환 시 ProgressBar가 사라져야 한다', () => {
+      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
+        if (callback) callback({ wandokEnabled: true });
+        return Promise.resolve({ wandokEnabled: true });
+      });
+
+      const { container } = render(<App />);
+      expect(container.querySelector('.fixed.top-0.right-0')).not.toBeNull();
+
+      act(() => {
+        storageChangeListener(
+          { wandokEnabled: { oldValue: true, newValue: false } },
+          'local',
+        );
+      });
+
+      expect(container.firstChild).toBeNull();
     });
 
-    it('ProgressBar가 렌더링되어야 한다', () => {
+    it('OFF → ON 전환 시 ProgressBar가 나타나야 한다', () => {
+      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
+        if (callback) callback({ wandokEnabled: false });
+        return Promise.resolve({ wandokEnabled: false });
+      });
+
       const { container } = render(<App />);
-      const progressBar = container.querySelector('.fixed.top-0.right-0');
-      expect(progressBar).not.toBeNull();
+      expect(container.firstChild).toBeNull();
+
+      act(() => {
+        storageChangeListener(
+          { wandokEnabled: { oldValue: false, newValue: true } },
+          'local',
+        );
+      });
+
+      expect(container.querySelector('.fixed.top-0.right-0')).not.toBeNull();
     });
   });
 });

@@ -8,11 +8,17 @@ import { extractTextNodes } from './utils/extractTextNodes';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
 
+interface StorageData {
+  wandokEnabled?: boolean;
+}
+
 // 관리 대상 문단들을 저장할 Set
 const allBlockElements = new Set<HTMLElement>();
 
 // 이미 처리된 텍스트 노드를 추적하여 중복 처리 방지
 const processedNodes = new WeakSet<Node>();
+
+let isEnabled = false;
 
 /**
  * 특정 요소의 가장 가까운 문단(Block) 요소를 찾는 헬퍼 함수
@@ -78,6 +84,7 @@ const processTextNode = (textNode: Node) => {
 
     // [기능 1] 클릭 시 문단 분리
     sentenceSpan.addEventListener('click', (e) => {
+      if (!isEnabled) return;
       e.stopPropagation();
 
       // 1. 문단 분리 실행 (이 과정에서 sentenceSpan의 부모가 바뀜)
@@ -92,6 +99,7 @@ const processTextNode = (textNode: Node) => {
 
     // [기능 2] 마우스 호버 시 블러 처리
     sentenceSpan.addEventListener('mouseenter', () => {
+      if (!isEnabled) return;
       // ★ 핵심 수정: 고정된 변수가 아니라, 호버 시점의 "현재 부모"를 실시간으로 찾음
       const currentBlock = getClosestBlock(sentenceSpan);
       if (currentBlock) {
@@ -100,6 +108,7 @@ const processTextNode = (textNode: Node) => {
     });
 
     sentenceSpan.addEventListener('mouseleave', () => {
+      if (!isEnabled) return;
       const currentBlock = getClosestBlock(sentenceSpan);
       if (currentBlock) {
         applyBlurEffect(currentBlock, allBlockElements, false);
@@ -121,6 +130,15 @@ const processElement = (element: HTMLElement) => {
 
   const textNodes = extractTextNodes(element);
   textNodes.forEach(processTextNode);
+};
+
+/**
+ * 모든 블러 효과 제거
+ */
+const clearAllBlurEffects = () => {
+  allBlockElements.forEach((element) => {
+    element.classList.remove('wandok-blur');
+  });
 };
 
 const initFocusMode = () => {
@@ -153,6 +171,23 @@ const initFocusMode = () => {
 
   const root = createRoot(rootElement);
   root.render(<App />);
+
+  chrome.storage.local.get('wandokEnabled', (result: StorageData) => {
+    isEnabled = result.wandokEnabled ?? false;
+  });
+
+  chrome.storage.onChanged.addListener((
+    changes: { [key: string]: chrome.storage.StorageChange },
+    areaName,
+  ) => {
+    if (areaName === 'local' && changes.wandokEnabled) {
+      isEnabled = (changes.wandokEnabled.newValue as boolean | undefined) ?? false;
+
+      if (!isEnabled) {
+        clearAllBlurEffects();
+      }
+    }
+  });
 
   /* Text Blur + Split Paragraph Logic */
   // 초기 페이지 로드 시 텍스트 처리
