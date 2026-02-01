@@ -1,7 +1,36 @@
-/**
- * Extension의 Shadow DOM에 마운트되는 루트 컴포넌트
- * 현재는 UI 컴포넌트가 없지만, 향후 확장을 위해 유지
- */
+import { useEffect, useState } from 'react';
+
+import { ProgressBar } from './ProgressBar';
+
 export const App = () => {
-  return null;
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    // 초기 상태 확인
+    chrome.storage.local.get('wandokEnabled', (result) => {
+      setIsEnabled(result.wandokEnabled ?? false);
+    });
+
+    // 상태 변경 리스닝
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string,
+    ) => {
+      if (areaName === 'local' && changes.wandokEnabled) {
+        setIsEnabled(changes.wandokEnabled.newValue ?? false);
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  if (!isEnabled) {
+    return null;
+  }
+
+  return <ProgressBar />;
 };
