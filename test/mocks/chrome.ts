@@ -1,10 +1,68 @@
-import { vi } from 'vitest';
+import { type Mock, vi } from 'vitest';
+
+interface MockChromeEvent {
+  addListener: Mock;
+}
+
+interface MockChromeEventWithRemove {
+  addListener: Mock;
+  removeListener: Mock;
+}
+
+interface MockChromeRuntime {
+  onInstalled: MockChromeEvent;
+  onMessage: MockChromeEventWithRemove;
+  sendMessage: Mock;
+  getURL: Mock;
+  id: string;
+}
+
+interface MockChromeAction {
+  setBadgeText: Mock;
+  getBadgeText: Mock;
+  setBadgeBackgroundColor: Mock;
+  onClicked: MockChromeEvent;
+}
+
+interface MockChromeScripting {
+  insertCSS: Mock;
+  executeScript: Mock;
+  removeCSS: Mock;
+}
+
+interface MockChromeTabs {
+  query: Mock;
+  reload: Mock;
+  sendMessage: Mock;
+  get: Mock;
+}
+
+interface MockChromeStorageArea {
+  get: Mock;
+  set: Mock;
+  remove: Mock;
+  clear: Mock;
+}
+
+interface MockChromeStorage {
+  local: MockChromeStorageArea;
+  sync: MockChromeStorageArea;
+  onChanged: MockChromeEventWithRemove;
+}
+
+export interface MockChrome {
+  runtime: MockChromeRuntime;
+  action: MockChromeAction;
+  scripting: MockChromeScripting;
+  tabs: MockChromeTabs;
+  storage: MockChromeStorage;
+}
 
 /**
  * Chrome Extension API Mock
  * 테스트에서 chrome.* API를 사용할 수 있도록 mock 제공
  */
-export const mockChrome: Partial<typeof chrome> = {
+export const mockChrome: MockChrome = {
   runtime: {
     onInstalled: {
       addListener: vi.fn(),
@@ -42,7 +100,10 @@ export const mockChrome: Partial<typeof chrome> = {
 
   storage: {
     local: {
-      get: vi.fn().mockResolvedValue({}),
+      get: vi.fn((keys, callback) => {
+        if (callback) callback({});
+        return Promise.resolve({});
+      }),
       set: vi.fn().mockResolvedValue(undefined),
       remove: vi.fn().mockResolvedValue(undefined),
       clear: vi.fn().mockResolvedValue(undefined),
@@ -52,6 +113,10 @@ export const mockChrome: Partial<typeof chrome> = {
       set: vi.fn().mockResolvedValue(undefined),
       remove: vi.fn().mockResolvedValue(undefined),
       clear: vi.fn().mockResolvedValue(undefined),
+    },
+    onChanged: {
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
     },
   },
 };
@@ -70,7 +135,7 @@ export const resetChromeMocks = (): void => {
     });
   };
 
-  resetObject(mockChrome);
+  resetObject(mockChrome as unknown as Record<string, unknown>);
 
   mockChrome.action.getBadgeText.mockResolvedValue('OFF');
   mockChrome.runtime.getURL.mockImplementation(
