@@ -5,6 +5,7 @@ import { App } from './components/App';
 import { BLOCK_SELECTOR } from './config/constants';
 import { applyBlurEffect } from './utils/applyBlurEffect';
 import { extractTextNodes } from './utils/extractTextNodes';
+import { restoreSplitParagraphs } from './utils/restoreSplitParagraphs';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
 
@@ -185,6 +186,7 @@ const initFocusMode = () => {
 
       if (!isEnabled) {
         clearAllBlurEffects();
+        restoreSplitParagraphs(allBlockElements);
       }
     }
   });
