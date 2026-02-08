@@ -1,4 +1,4 @@
-const LANDING_PAGE_URL = 'https://wandok-client.vercel.app/';
+const LANDING_PAGE_URL = 'https://www.wandok.site/';
 
 chrome.runtime.onInstalled.addListener((details) => {
   chrome.action.setBadgeText({

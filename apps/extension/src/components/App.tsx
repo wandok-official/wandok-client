@@ -7,7 +7,7 @@ export const App = () => {
 
   useEffect(() => {
     // 초기 상태 확인
-    chrome.storage.local.get('wandokEnabled', (result) => {
+    chrome.storage.local.get('wandokEnabled', (result: { wandokEnabled?: boolean }) => {
       setIsEnabled(result.wandokEnabled ?? false);
     });
 
@@ -17,7 +17,7 @@ export const App = () => {
       areaName: string,
     ) => {
       if (areaName === 'local' && changes.wandokEnabled) {
-        setIsEnabled(changes.wandokEnabled.newValue ?? false);
+        setIsEnabled((changes.wandokEnabled.newValue as boolean | undefined) ?? false);
       }
     };
 
