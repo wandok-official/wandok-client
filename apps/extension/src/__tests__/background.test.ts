@@ -33,6 +33,16 @@ describe('background', () => {
     return calls[0][0] as (tab: { id?: number; url?: string }) => Promise<void>;
   };
 
+  const importAndGetOnUpdatedListener = async () => {
+    await import('../background');
+    const calls = mockChrome.tabs.onUpdated.addListener.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    return calls[0][0] as (
+      tabId: number,
+      changeInfo: { status?: string },
+    ) => Promise<void>;
+  };
+
   // ==================== 정상 케이스 ====================
   describe('정상 케이스', () => {
     it('설치 시 배지를 OFF로 설정해야 한다', async () => {
@@ -100,6 +110,36 @@ describe('background', () => {
       await listener({ id: 1, url: 'https://example.com' });
 
       expect(mockChrome.storage.local.set).toHaveBeenCalledWith({ wandokEnabled: true });
+    });
+  });
+
+  // ==================== 탭 새로고침 시 badge 동기화 ====================
+  describe('탭 새로고침 시 badge 동기화', () => {
+    it('탭 로딩 완료 시 storage가 true이면 badge를 ON으로 설정해야 한다', async () => {
+      mockChrome.storage.local.get.mockResolvedValue({ wandokEnabled: true });
+      const listener = await importAndGetOnUpdatedListener();
+
+      await listener(1, { status: 'complete' });
+
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ tabId: 1, text: 'ON' });
+    });
+
+    it('탭 로딩 완료 시 storage가 false이면 badge를 OFF로 설정해야 한다', async () => {
+      mockChrome.storage.local.get.mockResolvedValue({ wandokEnabled: false });
+      const listener = await importAndGetOnUpdatedListener();
+
+      await listener(1, { status: 'complete' });
+
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ tabId: 1, text: 'OFF' });
+    });
+
+    it('status가 complete가 아니면 badge를 변경하지 않아야 한다', async () => {
+      const listener = await importAndGetOnUpdatedListener();
+
+      await listener(1, { status: 'loading' });
+
+      expect(mockChrome.storage.local.get).not.toHaveBeenCalled();
+      expect(mockChrome.action.setBadgeText).not.toHaveBeenCalled();
     });
   });
 

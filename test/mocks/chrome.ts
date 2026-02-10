@@ -35,6 +35,7 @@ interface MockChromeTabs {
   reload: Mock;
   sendMessage: Mock;
   get: Mock;
+  onUpdated: MockChromeEvent;
 }
 
 interface MockChromeStorageArea {
@@ -96,6 +97,9 @@ export const mockChrome: MockChrome = {
     reload: vi.fn().mockResolvedValue(undefined),
     sendMessage: vi.fn().mockResolvedValue(undefined),
     get: vi.fn().mockResolvedValue({ id: 1, url: 'https://example.com' }),
+    onUpdated: {
+      addListener: vi.fn(),
+    },
   },
 
   storage: {
