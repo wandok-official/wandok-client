@@ -1,9 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mockChrome, resetChromeMocks, setupChromeMock } from '@test/mocks/chrome';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('background', () => {
   beforeEach(() => {
+    vi.resetModules();
     resetChromeMocks();
+
+    mockChrome.action.setBadgeText.mockResolvedValue(undefined);
+    mockChrome.storage.local.set.mockResolvedValue(undefined);
+
+    (mockChrome.tabs as unknown as Record<string, unknown>).create =
+      vi.fn().mockResolvedValue(undefined);
+
     vi.stubGlobal('chrome', mockChrome);
   });
 
@@ -11,474 +19,113 @@ describe('background', () => {
     vi.clearAllMocks();
   });
 
-  // ==================== 정상 케이스 (Happy Path) ====================
+  const importAndGetOnInstalledListener = async () => {
+    await import('../background');
+    const calls = mockChrome.runtime.onInstalled.addListener.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    return calls[0][0] as (details: { reason: string }) => void;
+  };
+
+  const importAndGetOnClickedListener = async () => {
+    await import('../background');
+    const calls = mockChrome.action.onClicked.addListener.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    return calls[0][0] as (tab: { id?: number; url?: string }) => Promise<void>;
+  };
+
+  // ==================== 정상 케이스 ====================
   describe('정상 케이스', () => {
-    it('확장 프로그램 설치 시 배지를 OFF로 설정해야 한다', async () => {
-      // background.ts 동작 시뮬레이션
-      const onInstalledListener = vi.fn(() => {
-        mockChrome.action.setBadgeText({
-          text: 'OFF',
-        });
-      });
+    it('설치 시 배지를 OFF로 설정해야 한다', async () => {
+      const listener = await importAndGetOnInstalledListener();
 
-      mockChrome.runtime.onInstalled.addListener(onInstalledListener);
+      listener({ reason: 'install' });
 
-      // 이벤트 트리거
-      onInstalledListener();
-
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        text: 'OFF',
-      });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: 'OFF' });
     });
 
-    it('액션 클릭 시 배지 상태를 토글해야 한다 (OFF → ON)', async () => {
+    it('설치 시 storage에 wandokEnabled: false를 저장해야 한다', async () => {
+      const listener = await importAndGetOnInstalledListener();
+
+      listener({ reason: 'install' });
+
+      expect(mockChrome.storage.local.set).toHaveBeenCalledWith({ wandokEnabled: false });
+    });
+
+    it('install reason일 때 랜딩 페이지를 열어야 한다', async () => {
+      const listener = await importAndGetOnInstalledListener();
+
+      listener({ reason: 'install' });
+
+      const tabsCreate =
+        (mockChrome.tabs as unknown as Record<string, unknown>).create as ReturnType<typeof vi.fn>;
+
+      expect(tabsCreate).toHaveBeenCalledWith({ url: 'https://www.wandok.site/' });
+    });
+
+    it('install이 아닌 reason(update)일 때 랜딩 페이지를 열지 않아야 한다', async () => {
+      const listener = await importAndGetOnInstalledListener();
+
+      listener({ reason: 'update' });
+
+      const tabsCreate =
+        (mockChrome.tabs as unknown as Record<string, unknown>).create as ReturnType<typeof vi.fn>;
+
+      expect(tabsCreate).not.toHaveBeenCalled();
+    });
+
+    it('액션 클릭 시 OFF → ON으로 토글해야 한다', async () => {
       setupChromeMock.setBadgeState('OFF');
+      const listener = await importAndGetOnClickedListener();
 
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      // 클릭 이벤트 트리거
-      await onClickedListener(tab);
+      await listener({ id: 1, url: 'https://example.com' });
 
       expect(mockChrome.action.getBadgeText).toHaveBeenCalledWith({ tabId: 1 });
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        tabId: 1,
-        text: 'ON',
-      });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ tabId: 1, text: 'ON' });
     });
 
-    it('액션 클릭 시 배지 상태를 토글해야 한다 (ON → OFF)', async () => {
+    it('액션 클릭 시 ON → OFF로 토글해야 한다', async () => {
       setupChromeMock.setBadgeState('ON');
+      const listener = await importAndGetOnClickedListener();
 
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
+      await listener({ id: 1, url: 'https://example.com' });
 
       expect(mockChrome.action.getBadgeText).toHaveBeenCalledWith({ tabId: 1 });
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        tabId: 1,
-        text: 'OFF',
-      });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ tabId: 1, text: 'OFF' });
     });
 
-    it('ON 상태로 전환 시 CSS를 삽입해야 한다', async () => {
+    it('클릭 시 storage에 wandokEnabled 상태를 저장해야 한다', async () => {
       setupChromeMock.setBadgeState('OFF');
+      const listener = await importAndGetOnClickedListener();
 
-      const tab = { id: 1, url: 'https://example.com' };
+      await listener({ id: 1, url: 'https://example.com' });
 
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.insertCSS({
-            target: { tabId: clickedTab.id },
-            files: ['content.css'],
-          });
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
-
-      expect(mockChrome.scripting.insertCSS).toHaveBeenCalledWith({
-        target: { tabId: 1 },
-        files: ['content.css'],
-      });
-    });
-
-    it('ON 상태로 전환 시 스크립트를 실행해야 한다', async () => {
-      setupChromeMock.setBadgeState('OFF');
-
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.executeScript({
-            target: { tabId: clickedTab.id },
-            files: ['content.js'],
-          });
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
-
-      expect(mockChrome.scripting.executeScript).toHaveBeenCalledWith({
-        target: { tabId: 1 },
-        files: ['content.js'],
-      });
-    });
-
-    it('OFF 상태로 전환 시 탭을 리로드해야 한다', async () => {
-      setupChromeMock.setBadgeState('ON');
-
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'OFF') {
-          mockChrome.tabs.reload(clickedTab.id);
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
-
-      expect(mockChrome.tabs.reload).toHaveBeenCalledWith(1);
+      expect(mockChrome.storage.local.set).toHaveBeenCalledWith({ wandokEnabled: true });
     });
   });
 
-  // ==================== 빈 값 / null / undefined 처리 ====================
+  // ==================== 빈 값 처리 ====================
   describe('빈 값 처리', () => {
     it('tab.id가 없으면 아무 동작도 하지 않아야 한다', async () => {
-      const tabWithoutId = { url: 'https://example.com' };
+      const listener = await importAndGetOnClickedListener();
 
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tabWithoutId as chrome.tabs.Tab);
+      await listener({ url: 'https://example.com' });
 
       expect(mockChrome.action.getBadgeText).not.toHaveBeenCalled();
-    });
-
-    it('tab.id가 undefined면 아무 동작도 하지 않아야 한다', async () => {
-      const tab = { id: undefined, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: 'ON',
-        });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab as chrome.tabs.Tab);
-
       expect(mockChrome.action.setBadgeText).not.toHaveBeenCalled();
+      expect(mockChrome.storage.local.set).not.toHaveBeenCalled();
     });
   });
 
-  // ==================== 동일 입력 → 동일 출력 ====================
-  describe('멱등성 및 일관성', () => {
-    it('동일한 탭에서 여러 번 클릭 시 일관되게 토글되어야 한다', async () => {
-      const tab = { id: 1, url: 'https://example.com' };
-
-      // 초기 상태: OFF
-      setupChromeMock.setBadgeState('OFF');
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      // 첫 번째 클릭: OFF → ON
-      await onClickedListener(tab);
-      expect(mockChrome.action.setBadgeText).toHaveBeenLastCalledWith({
-        tabId: 1,
-        text: 'ON',
-      });
-
-      // 두 번째 클릭: ON → OFF
-      setupChromeMock.setBadgeState('ON');
-      await onClickedListener(tab);
-      expect(mockChrome.action.setBadgeText).toHaveBeenLastCalledWith({
-        tabId: 1,
-        text: 'OFF',
-      });
-
-      // 세 번째 클릭: OFF → ON
-      setupChromeMock.setBadgeState('OFF');
-      await onClickedListener(tab);
-      expect(mockChrome.action.setBadgeText).toHaveBeenLastCalledWith({
-        tabId: 1,
-        text: 'ON',
-      });
-    });
-
-    it('여러 탭에서 독립적으로 동작해야 한다', async () => {
-      const tab1 = { id: 1, url: 'https://example1.com' };
-      const tab2 = { id: 2, url: 'https://example2.com' };
-
-      mockChrome.action.getBadgeText.mockImplementation(
-        async ({ tabId }: { tabId: number }) => {
-          return tabId === 1 ? 'OFF' : 'ON';
-        },
-      );
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      // Tab 1 클릭: OFF → ON
-      await onClickedListener(tab1);
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        tabId: 1,
-        text: 'ON',
-      });
-
-      // Tab 2 클릭: ON → OFF
-      await onClickedListener(tab2);
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        tabId: 2,
-        text: 'OFF',
-      });
-    });
-  });
-
-  // ==================== 에러 상황 및 복구 ====================
+  // ==================== 에러 상황 ====================
   describe('에러 상황', () => {
-    it('CSS 삽입 실패 시 에러를 전파해야 한다', async () => {
+    it('setBadgeText 실패 시 에러를 전파해야 한다', async () => {
       setupChromeMock.setBadgeState('OFF');
-      mockChrome.scripting.insertCSS.mockRejectedValue(new Error('CSS injection failed'));
+      mockChrome.action.setBadgeText.mockRejectedValue(new Error('setBadgeText failed'));
 
-      const tab = { id: 1, url: 'https://example.com' };
+      const listener = await importAndGetOnClickedListener();
 
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.insertCSS({
-            target: { tabId: clickedTab.id },
-            files: ['content.css'],
-          });
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await expect(onClickedListener(tab)).rejects.toThrow('CSS injection failed');
-    });
-
-    it('스크립트 실행 실패 시 에러를 전파해야 한다', async () => {
-      setupChromeMock.setBadgeState('OFF');
-      mockChrome.scripting.executeScript.mockRejectedValue(
-        new Error('Script execution failed'),
-      );
-
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.insertCSS({
-            target: { tabId: clickedTab.id },
-            files: ['content.css'],
-          });
-
-          await mockChrome.scripting.executeScript({
-            target: { tabId: clickedTab.id },
-            files: ['content.js'],
-          });
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await expect(onClickedListener(tab)).rejects.toThrow('Script execution failed');
-    });
-  });
-
-  // ==================== 복잡한 시나리오 ====================
-  describe('복잡한 시나리오', () => {
-    it('ON 전환 시 CSS와 스크립트를 순서대로 실행해야 한다', async () => {
-      setupChromeMock.setBadgeState('OFF');
-
-      const tab = { id: 1, url: 'https://example.com' };
-      const executionOrder: string[] = [];
-
-      mockChrome.scripting.insertCSS.mockImplementation(async () => {
-        executionOrder.push('insertCSS');
-      });
-
-      mockChrome.scripting.executeScript.mockImplementation(async () => {
-        executionOrder.push('executeScript');
-        return [];
-      });
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.insertCSS({
-            target: { tabId: clickedTab.id },
-            files: ['content.css'],
-          });
-
-          await mockChrome.scripting.executeScript({
-            target: { tabId: clickedTab.id },
-            files: ['content.js'],
-          });
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
-
-      expect(executionOrder).toEqual(['insertCSS', 'executeScript']);
-    });
-
-    it('OFF 전환 시 CSS/스크립트를 실행하지 않고 탭만 리로드해야 한다', async () => {
-      setupChromeMock.setBadgeState('ON');
-
-      const tab = { id: 1, url: 'https://example.com' };
-
-      const onClickedListener = vi.fn(async (clickedTab) => {
-        if (!clickedTab.id) return;
-
-        const prevState = await mockChrome.action.getBadgeText({ tabId: clickedTab.id });
-        const nextState = prevState === 'ON' ? 'OFF' : 'ON';
-
-        await mockChrome.action.setBadgeText({
-          tabId: clickedTab.id,
-          text: nextState,
-        });
-
-        if (nextState === 'ON') {
-          await mockChrome.scripting.insertCSS({
-            target: { tabId: clickedTab.id },
-            files: ['content.css'],
-          });
-
-          await mockChrome.scripting.executeScript({
-            target: { tabId: clickedTab.id },
-            files: ['content.js'],
-          });
-        } else {
-          mockChrome.tabs.reload(clickedTab.id);
-        }
-      });
-
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      await onClickedListener(tab);
-
-      expect(mockChrome.scripting.insertCSS).not.toHaveBeenCalled();
-      expect(mockChrome.scripting.executeScript).not.toHaveBeenCalled();
-      expect(mockChrome.tabs.reload).toHaveBeenCalledWith(1);
-    });
-
-    it('리스너가 올바르게 등록되어야 한다', () => {
-      const onInstalledListener = vi.fn();
-      const onClickedListener = vi.fn();
-
-      mockChrome.runtime.onInstalled.addListener(onInstalledListener);
-      mockChrome.action.onClicked.addListener(onClickedListener);
-
-      expect(mockChrome.runtime.onInstalled.addListener).toHaveBeenCalledWith(
-        onInstalledListener,
-      );
-      expect(mockChrome.action.onClicked.addListener).toHaveBeenCalledWith(
-        onClickedListener,
+      await expect(listener({ id: 1, url: 'https://example.com' })).rejects.toThrow(
+        'setBadgeText failed',
       );
     });
   });
