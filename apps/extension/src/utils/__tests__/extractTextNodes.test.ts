@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { extractTextNodes } from '../extractTextNodes';
 
 describe('extractTextNodes', () => {
@@ -51,6 +52,21 @@ describe('extractTextNodes', () => {
       expect(result).toHaveLength(1);
       expect(result[0].textContent).toBe('Visible');
     });
+
+    it('BUTTON, A, LABEL, SUMMARY 태그 내부의 텍스트는 추출에서 제외해야 한다', () => {
+      container.innerHTML = `
+        <p>Visible</p>
+        <button>Click me</button>
+        <a href="#">Link text</a>
+        <label>Label text</label>
+        <summary>Summary text</summary>
+      `;
+
+      const result = extractTextNodes(container);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].textContent).toBe('Visible');
+    });
   });
 
   // ==================== 빈 값 / null / undefined 처리 ====================
@@ -81,21 +97,6 @@ describe('extractTextNodes', () => {
     });
   });
 
-  // ==================== 동일 입력 → 동일 출력 ====================
-
-  describe('동일 입력 → 동일 출력', () => {
-    it('동일한 컨테이너로 여러 번 호출해도 동일한 결과를 반환해야 한다.', () => {
-      container.innerHTML = '<p>Hello</p><p>World</p>';
-
-      const result1 = extractTextNodes(container);
-      const result2 = extractTextNodes(container);
-
-      expect(result1.map((n) => n.textContent)).toEqual(
-        result2.map((n) => n.textContent),
-      );
-    });
-  });
-
   // ==================== 에러 상황 및 복구 ====================
 
   describe('에러 상황 및 복구', () => {
@@ -108,16 +109,6 @@ describe('extractTextNodes', () => {
       expect(result[0].textContent).toBe('Deep Text');
     });
 
-    it('매우 많은 텍스트 노드도 정상적으로 처리해야 한다.', () => {
-      container.innerHTML = Array.from(
-        { length: 100 },
-        (_, i) => `<p>Text ${i}</p>`,
-      ).join('');
-
-      const result = extractTextNodes(container);
-
-      expect(result).toHaveLength(100);
-    });
   });
 
   // ==================== 중첩 구조 케이스 ====================

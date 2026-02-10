@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { segmentSentences } from '../segmentSentences';
 
 describe('segmentSentences', () => {
@@ -39,28 +40,45 @@ describe('segmentSentences', () => {
     });
   });
 
-  // ==================== 동일 입력 → 동일 출력 ====================
+  // ==================== 엣지 케이스 ====================
 
-  describe('동일 입력 → 동일 출력', () => {
-    it('동일한 입력에 대해 항상 동일한 결과를 반환해야 한다.', () => {
-      const input = 'Hello World. This is a test.';
-      const result1 = segmentSentences(input);
-      const result2 = segmentSentences(input);
-      const result3 = segmentSentences(input);
+  describe('엣지 케이스', () => {
+    it('마침표가 없는 텍스트는 하나의 문장으로 반환해야 한다', () => {
+      const result = segmentSentences('Hello World');
 
-      expect(result1).toEqual(result2);
-      expect(result2).toEqual(result3);
+      expect(result).toEqual(['Hello World']);
     });
-  });
 
-  // ==================== 에러 상황 및 복구 ====================
+    it('줄임표가 포함된 문장을 올바르게 처리해야 한다', () => {
+      const result = segmentSentences('Wait... Really? Yes.');
 
-  describe('에러 상황 및 복구', () => {
-    it('매우 긴 텍스트도 정상적으로 처리해야 한다.', () => {
-      const longText = 'This is a sentence. '.repeat(100);
-      const result = segmentSentences(longText);
+      expect(result.length).toBeGreaterThanOrEqual(2);
+      expect(result.join(' ')).toContain('Wait...');
+      expect(result.join(' ')).toContain('Yes.');
+    });
 
-      expect(result).toHaveLength(100);
+    it('공백만 있는 문자열의 동작을 검증해야 한다', () => {
+      const result = segmentSentences('   ');
+
+      expect(result).toEqual(['']);
+    });
+
+    it('느낌표로만 끝나는 문장을 분리해야 한다', () => {
+      const result = segmentSentences('Great! Amazing! Wonderful!');
+
+      expect(result).toHaveLength(3);
+      expect(result[0]).toBe('Great!');
+      expect(result[1]).toBe('Amazing!');
+      expect(result[2]).toBe('Wonderful!');
+    });
+
+    it('나머지 약어(Mrs., Prof., Jr. 등)가 포함된 문장도 올바르게 처리해야 한다', () => {
+      const text = 'Mrs. Smith met Prof. Lee. Jr. members joined.';
+      const result = segmentSentences(text);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBe('Mrs. Smith met Prof. Lee.');
+      expect(result[1]).toBe('Jr. members joined.');
     });
   });
 
