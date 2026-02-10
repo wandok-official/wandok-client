@@ -1,58 +1,51 @@
-import { useEffect, useRef } from 'react';
-import { getScrollPercentage } from '../utils/getScrollPercentage';
+import { useEffect } from 'react';
 
-const SCROLL_COMPLETE_THRESHOLD = 99;
 const STEP3_SELECTOR = 'article[data-guide-step="3"]';
 
 /**
  * Step 3: 스크롤 진행률 기능 체험 감지
- * 사용자가 페이지를 끝까지 스크롤하면 완료 처리
+ * Step 3 영역이 뷰포트에 진입하면 완료 처리
  */
 export const useStep3ScrollProgressDetection = (
   isCompleted: boolean,
   onComplete: () => void,
 ) => {
-  const progressEventFired = useRef(false);
-
   useEffect(() => {
     if (isCompleted) return;
 
-    const handleScroll = () => {
-      if (progressEventFired.current) return;
+    const observeStep3 = (element: Element) => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            onComplete();
+          }
+        },
+        { threshold: 0 },
+      );
 
-      const percent = getScrollPercentage();
-      if (percent >= SCROLL_COMPLETE_THRESHOLD) {
-        progressEventFired.current = true;
-        onComplete();
-      }
+      observer.observe(element);
+
+      return observer;
     };
 
-    const startScrollTracking = () => {
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          handleScroll();
-        });
-      });
-    };
+    const step3Element = document.querySelector(STEP3_SELECTOR);
 
-    if (document.querySelector(STEP3_SELECTOR)) {
-      startScrollTracking();
-      return () => window.removeEventListener('scroll', handleScroll);
+    if (step3Element) {
+      const observer = observeStep3(step3Element);
+      return () => observer.disconnect();
     }
 
-    const observer = new MutationObserver((_mutations, obs) => {
-      if (document.querySelector(STEP3_SELECTOR)) {
+    const mutationObserver = new MutationObserver((_mutations, obs) => {
+      const element = document.querySelector(STEP3_SELECTOR);
+      if (element) {
         obs.disconnect();
-        startScrollTracking();
+        observeStep3(element);
       }
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => mutationObserver.disconnect();
   }, [isCompleted, onComplete]);
 };
