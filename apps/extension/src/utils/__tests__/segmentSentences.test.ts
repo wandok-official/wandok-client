@@ -52,9 +52,10 @@ describe('segmentSentences', () => {
     it('줄임표가 포함된 문장을 올바르게 처리해야 한다', () => {
       const result = segmentSentences('Wait... Really? Yes.');
 
-      expect(result.length).toBeGreaterThanOrEqual(2);
-      expect(result.join(' ')).toContain('Wait...');
-      expect(result.join(' ')).toContain('Yes.');
+      expect(result).toHaveLength(3);
+      expect(result[0]).toBe('Wait...');
+      expect(result[1]).toBe('Really?');
+      expect(result[2]).toBe('Yes.');
     });
 
     it('공백만 있는 문자열의 동작을 검증해야 한다', () => {
