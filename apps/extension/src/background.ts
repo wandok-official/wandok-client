@@ -28,3 +28,5 @@ chrome.action.onClicked.addListener(async (tab) => {
   // storage에 상태 저장
   await chrome.storage.local.set({ wandokEnabled: isEnabled });
 });
+
+export {};
