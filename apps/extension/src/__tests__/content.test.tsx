@@ -93,7 +93,7 @@ describe('Content Script 통합 테스트', () => {
   };
 
   describe('초기 상태', () => {
-    it('OFF일 때 ProgressBar가 없어야 한다', async () => {
+    it('OFF일 때 shadow host가 DOM에 없어야 한다', async () => {
       vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
         if (callback) callback({ wandokEnabled: false });
         return Promise.resolve({ wandokEnabled: false });
@@ -106,10 +106,8 @@ describe('Content Script 통합 테스트', () => {
       });
 
       const shadowHost = document.getElementById('wandok-shadow-host');
-      const shadowRoot = shadowHost?.shadowRoot;
-      const progressBar = shadowRoot?.querySelector('.fixed.top-0.right-0');
 
-      expect(progressBar).toBeNull();
+      expect(shadowHost).toBeNull();
     });
 
     it('ON일 때 ProgressBar가 있어야 한다', async () => {
