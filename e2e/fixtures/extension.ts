@@ -46,25 +46,23 @@ export async function activateExtension(context: BrowserContext, page: Page): Pr
     background = await context.waitForEvent('serviceworker');
   }
 
-  const pageUrl = page.url();
+  await background.evaluate(async () => {
+    // tabs 권한 없이도 active tab은 id로 접근 가능
+    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
 
-  await background.evaluate(async (url) => {
-    const tabs = await chrome.tabs.query({});
-    const targetTab = tabs.find(tab => tab.url === url);
-
-    if (!targetTab?.id) {
-      console.error('Target tab not found for URL:', url);
+    if (!activeTab?.id) {
+      console.error('Active tab not found');
       return;
     }
 
     await chrome.action.setBadgeText({
-      tabId: targetTab.id,
+      tabId: activeTab.id,
       text: 'ON',
     });
 
     try {
       await chrome.scripting.insertCSS({
-        target: { tabId: targetTab.id },
+        target: { tabId: activeTab.id },
         files: ['content.css'],
       });
     } catch (e) {
@@ -73,7 +71,7 @@ export async function activateExtension(context: BrowserContext, page: Page): Pr
 
     try {
       await chrome.scripting.executeScript({
-        target: { tabId: targetTab.id },
+        target: { tabId: activeTab.id },
         files: ['content.js'],
       });
     } catch (e) {
@@ -81,7 +79,7 @@ export async function activateExtension(context: BrowserContext, page: Page): Pr
     }
 
     await chrome.storage.local.set({ wandokEnabled: true });
-  }, pageUrl);
+  });
 
   await page.waitForTimeout(1000);
 }
