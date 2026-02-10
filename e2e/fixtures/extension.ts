@@ -79,6 +79,8 @@ export async function activateExtension(context: BrowserContext, page: Page): Pr
     } catch (e) {
       console.error('Script injection failed:', e);
     }
+
+    await chrome.storage.local.set({ wandokEnabled: true });
   }, pageUrl);
 
   await page.waitForTimeout(1000);

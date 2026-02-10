@@ -34,7 +34,7 @@ test.describe('Focus Mode (블러)', () => {
     await activateExtension(context, page);
     await waitForShadowHost(page);
 
-    // mouseenter 후 mouseleave 발생
+    // mouseenter로 블러 적용
     await page.evaluate(() => {
       const wrapper = document.querySelector('#paragraph-1 .wandok-text-wrapper');
       if (wrapper) {
@@ -44,6 +44,14 @@ test.describe('Focus Mode (블러)', () => {
 
     await page.waitForTimeout(200);
 
+    // 블러가 실제로 적용되었는지 먼저 확인 (false pass 방지)
+    const blurApplied = await page.evaluate(() => {
+      const el = document.getElementById('paragraph-2');
+      return el ? window.getComputedStyle(el).filter : '';
+    });
+    expect(blurApplied).toContain('blur');
+
+    // mouseleave로 블러 해제
     await page.evaluate(() => {
       const wrapper = document.querySelector('#paragraph-1 .wandok-text-wrapper');
       if (wrapper) {
@@ -77,6 +85,14 @@ test.describe('Focus Mode (블러)', () => {
 
     await page.waitForTimeout(200);
 
+    // 다른 문단에 블러가 적용되었는지 확인 (false pass 방지)
+    const secondParagraphFilter = await page.evaluate(() => {
+      const el = document.getElementById('paragraph-2');
+      return el ? window.getComputedStyle(el).filter : '';
+    });
+    expect(secondParagraphFilter).toContain('blur');
+
+    // 마우스가 올라간 문단은 선명해야 함
     const firstParagraphFilter = await page.evaluate(() => {
       const el = document.getElementById('paragraph-1');
       return el ? window.getComputedStyle(el).filter : '';
