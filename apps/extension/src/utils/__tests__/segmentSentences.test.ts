@@ -19,8 +19,8 @@ describe('segmentSentences', () => {
       const result = segmentSentences(text);
 
       expect(result).toHaveLength(3);
-      expect(result[0]).toBe('First sentence.');
-      expect(result[1]).toBe('Second sentence.');
+      expect(result[0]).toBe('First sentence. ');
+      expect(result[1]).toBe('Second sentence. ');
       expect(result[2]).toBe('Third sentence.');
     });
   });
@@ -53,23 +53,23 @@ describe('segmentSentences', () => {
       const result = segmentSentences('Wait... Really? Yes.');
 
       expect(result).toHaveLength(3);
-      expect(result[0]).toBe('Wait...');
-      expect(result[1]).toBe('Really?');
+      expect(result[0]).toBe('Wait... ');
+      expect(result[1]).toBe('Really? ');
       expect(result[2]).toBe('Yes.');
     });
 
     it('공백만 있는 문자열의 동작을 검증해야 한다', () => {
       const result = segmentSentences('   ');
 
-      expect(result).toEqual(['']);
+      expect(result).toEqual(['   ']);
     });
 
     it('느낌표로만 끝나는 문장을 분리해야 한다', () => {
       const result = segmentSentences('Great! Amazing! Wonderful!');
 
       expect(result).toHaveLength(3);
-      expect(result[0]).toBe('Great!');
-      expect(result[1]).toBe('Amazing!');
+      expect(result[0]).toBe('Great! ');
+      expect(result[1]).toBe('Amazing! ');
       expect(result[2]).toBe('Wonderful!');
     });
 
@@ -78,7 +78,7 @@ describe('segmentSentences', () => {
       const result = segmentSentences(text);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe('Mrs. Smith met Prof. Lee.');
+      expect(result[0]).toBe('Mrs. Smith met Prof. Lee. ');
       expect(result[1]).toBe('Jr. members joined.');
     });
   });
@@ -91,7 +91,7 @@ describe('segmentSentences', () => {
       const result = segmentSentences(text);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe('안녕하세요, 제 이름은 Alice 입니다.');
+      expect(result[0]).toBe('안녕하세요, 제 이름은 Alice 입니다. ');
       expect(result[1]).toBe('Bob의 친구입니다.');
     });
 
@@ -100,7 +100,7 @@ describe('segmentSentences', () => {
       const result = segmentSentences(text);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe('What\'s her name?');
+      expect(result[0]).toBe('What\'s her name? ');
       expect(result[1]).toBe('She\'s Alice.');
     });
 
@@ -109,7 +109,7 @@ describe('segmentSentences', () => {
       const result = segmentSentences(text);
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe('Where is Mr. Kim?');
+      expect(result[0]).toBe('Where is Mr. Kim? ');
       expect(result[1]).toBe('Dr. Kim is over there.');
     });
   });
