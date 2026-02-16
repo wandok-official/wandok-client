@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mockChrome, resetChromeMocks, setupChromeMock } from '@test/mocks/chrome';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('background', () => {
   beforeEach(() => {

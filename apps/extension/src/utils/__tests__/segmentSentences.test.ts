@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { segmentSentences } from '../segmentSentences';
 
 describe('segmentSentences', () => {
