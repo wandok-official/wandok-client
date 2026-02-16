@@ -114,7 +114,6 @@ jobs:
   e2e:
     name: E2E
     needs: build-extension
-    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
