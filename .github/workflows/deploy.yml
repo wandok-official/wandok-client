@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [development, main]
+    branches: [development, main, 'release/*']
 
 concurrency:
   group: deploy-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
