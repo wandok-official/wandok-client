@@ -106,6 +106,7 @@ PR이 생성되면 CI가 자동으로 실행됩니다.
 
 릴리스 시점에 `release/<version>` 브랜치를 생성하여 배포를 진행합니다.
 
-- `main`에 병합되면 Vercel Production에 자동 배포됩니다.
+- **웹 (`apps/web`)**: `main`에 병합되면 Vercel Production에 자동 배포됩니다.
+- **확장 프로그램 (`apps/extension`)**: 빌드 후 Chrome Web Store에 심사를 제출합니다. 심사 승인까지 대기 기간이 있으므로 릴리스 일정에 반영합니다.
 
 > 자세한 내용: [릴리스 프로세스 가이드](./RELEASE_PROCESS.md)

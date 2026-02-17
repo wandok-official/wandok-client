@@ -9,11 +9,12 @@
   - [목차](#목차)
   - [1. 프로젝트 구조](#1-프로젝트-구조)
   - [2. 릴리스 절차](#2-릴리스-절차)
-  - [3. 긴급 핫픽스 절차](#3-긴급-핫픽스-절차)
-  - [4. 배포 방법](#4-배포-방법)
-    - [4.1 웹 (apps/web)](#41-웹-appsweb)
-    - [4.2 확장 프로그램 (apps/extension)](#42-확장-프로그램-appsextension)
-  - [5. 버전 관리](#5-버전-관리)
+  - [3. 릴리즈 노트](#3-릴리즈-노트)
+  - [4. 긴급 핫픽스 절차](#4-긴급-핫픽스-절차)
+  - [5. 배포 방법](#5-배포-방법)
+    - [5.1 웹 (apps/web)](#51-웹-appsweb)
+    - [5.2 확장 프로그램 (apps/extension)](#52-확장-프로그램-appsextension)
+  - [6. 버전 관리](#6-버전-관리)
 
 ---
 <br>
@@ -84,7 +85,56 @@ release/<version> → development (PR)
 ---
 <br>
 
-## 3. 긴급 핫픽스 절차
+## 3. 릴리즈 노트
+
+release → main 병합 시 **릴리즈 노트를 작성**하여 버전별 변경 사항을 기록합니다. 크롬 확장 프로그램은 심사 기반 배포를 하므로, 어떤 변경이 어떤 버전으로 나갔는지 명확히 남기는 것이 중요합니다.
+
+GitHub Release 기능을 사용하여 릴리즈 노트를 관리합니다.
+
+### 작성 시점
+
+release → main PR이 병합된 직후, 해당 버전의 GitHub Release를 생성합니다.
+
+### 작성 방법
+
+**방법 1: GitHub 웹 UI**
+
+1. 레포지토리 → **Releases** → **Draft a new release** 클릭
+2. **Choose a tag** → 새 태그 입력 (예: `v1.2.0`) → **Create new tag** 선택
+3. Target 브랜치를 `main`으로 설정
+4. **Generate release notes** 버튼을 클릭하면 PR 목록이 자동 생성됨
+5. 필요에 따라 내용을 편집한 뒤 **Publish release** 클릭
+
+**방법 2: GitHub CLI**
+
+```bash
+gh release create v1.2.0 \
+  --target main \
+  --title "v1.2.0" \
+  --generate-notes
+```
+
+> `--generate-notes` 옵션을 사용하면 이전 릴리즈 이후의 PR 목록이 자동으로 포함됩니다.
+
+### 릴리즈 노트 포함 내용
+
+```markdown
+## v1.2.0
+
+### 새로운 기능
+- 기능 A 추가 (#이슈번호)
+
+### 버그 수정
+- B 관련 버그 수정 (#이슈번호)
+
+### 기타 변경
+- C 리팩토링
+```
+
+---
+<br>
+
+## 4. 긴급 핫픽스 절차
 
 프로덕션에서 긴급한 버그가 발견된 경우, 릴리스 절차를 거치지 않고 `hotfix` 브랜치를 통해 빠르게 수정합니다.
 
@@ -120,16 +170,16 @@ hotfix/critical-crash → development (PR)
 ---
 <br>
 
-## 4. 배포 방법
+## 5. 배포 방법
 
-### 4.1 웹 (apps/web)
+### 5.1 웹 (apps/web)
 
 Vercel을 통해 자동 배포됩니다.
 
 - `main` 브랜치에 병합되면 프로덕션 환경에 자동 배포됩니다.
 - PR 생성 시 Preview 배포가 생성됩니다.
 
-### 4.2 확장 프로그램 (apps/extension)
+### 5.2 확장 프로그램 (apps/extension)
 
 Chrome Web Store에 수동으로 제출합니다.
 
@@ -144,7 +194,7 @@ Chrome Web Store에 수동으로 제출합니다.
 ---
 <br>
 
-## 5. 버전 관리
+## 6. 버전 관리
 
 [Semantic Versioning](https://semver.org/lang/ko/)을 따릅니다.
 

@@ -76,6 +76,16 @@ CI/CD는 GitHub Actions를 통해 자동 실행됩니다. 워크플로우는 두
 
 > PR에서 Test 잡이 실행되면 **커버리지 리포트**가 PR 코멘트로 자동 게시됩니다.
 
+**커버리지 최소 기준** (`vitest.config.ts`):
+
+| 항목 | 기준 |
+| :--- | :--- |
+| Functions | 70% |
+| Branches | 60% |
+| Statements | 70% |
+
+> 기준 미달 시 테스트가 실패하여 CI Gate를 통과할 수 없습니다.
+
 ### 2.3 변경 감지 (paths-filter)
 
 `dorny/paths-filter`를 사용하여 변경된 파일에 따라 필요한 잡만 실행합니다.
@@ -164,7 +174,7 @@ Chrome Web Store에 수동으로 제출합니다.
 4. 심사 요청 제출
 ```
 
-> 자세한 절차: [릴리스 프로세스 - 배포 방법](./RELEASE_PROCESS.md#4-배포-방법)
+> 자세한 절차: [릴리스 프로세스 - 배포 방법](./RELEASE_PROCESS.md#5-배포-방법)
 
 ---
 <br>
