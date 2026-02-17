@@ -146,7 +146,6 @@ const initFocusMode = () => {
   /* Shadow DOM Setup for React Components */
   const shadowHost = document.createElement('div');
   shadowHost.id = 'wandok-shadow-host';
-  document.body.appendChild(shadowHost);
 
   const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
 
@@ -173,8 +172,20 @@ const initFocusMode = () => {
   const root = createRoot(rootElement);
   root.render(<App />);
 
+  const updateEnabledState = (enabled: boolean) => {
+    isEnabled = enabled;
+    if (enabled) {
+      if (!shadowHost.parentNode) {
+        document.body.appendChild(shadowHost);
+      }
+    } else {
+      shadowHost.remove();
+    }
+    window.dispatchEvent(new CustomEvent(enabled ? 'wandok:activated' : 'wandok:deactivated'));
+  };
+
   chrome.storage.local.get('wandokEnabled', (result: StorageData) => {
-    isEnabled = result.wandokEnabled ?? false;
+    updateEnabledState(result.wandokEnabled ?? false);
   });
 
   chrome.storage.onChanged.addListener((
@@ -182,9 +193,10 @@ const initFocusMode = () => {
     areaName,
   ) => {
     if (areaName === 'local' && changes.wandokEnabled) {
-      isEnabled = (changes.wandokEnabled.newValue as boolean | undefined) ?? false;
+      const enabled = (changes.wandokEnabled.newValue as boolean | undefined) ?? false;
+      updateEnabledState(enabled);
 
-      if (!isEnabled) {
+      if (!enabled) {
         clearAllBlurEffects();
         restoreSplitParagraphs(allBlockElements);
       }

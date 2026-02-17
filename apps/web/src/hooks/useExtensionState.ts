@@ -14,9 +14,7 @@ export const useExtensionState = () => {
 
   useEffect(() => {
     const checkState = () => {
-      if (checkExtensionActive()) {
-        setExtensionState('active');
-      }
+      setExtensionState(checkExtensionActive() ? 'active' : 'inactive');
     };
 
     // 초기 상태 확인
@@ -25,16 +23,22 @@ export const useExtensionState = () => {
     // 주기적으로 상태 확인
     const interval = setInterval(checkState, POLL_INTERVAL);
 
-    // 익스텐션 활성화 이벤트 리스너
+    // 익스텐션 활성화/비활성화 이벤트 리스너
     const handleActivated = () => {
       setExtensionState('active');
     };
 
+    const handleDeactivated = () => {
+      setExtensionState('inactive');
+    };
+
     window.addEventListener('wandok:activated', handleActivated);
+    window.addEventListener('wandok:deactivated', handleDeactivated);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('wandok:activated', handleActivated);
+      window.removeEventListener('wandok:deactivated', handleDeactivated);
     };
   }, []);
 

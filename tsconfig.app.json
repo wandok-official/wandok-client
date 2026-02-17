@@ -23,5 +23,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["apps/web/src", "tsconfig.eslint.json"]
+  "include": ["apps/web/src", "tsconfig.eslint.json"],
+  "exclude": [
+    "apps/web/src/**/*.test.ts",
+    "apps/web/src/**/*.test.tsx",
+    "apps/web/src/**/__tests__/**"
+  ]
 }

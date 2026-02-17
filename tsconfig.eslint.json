@@ -22,5 +22,6 @@
     "eslint.config.js",
     "e2e/**/*",
     "playwright.config.ts"
-  ]
+  ],
+  "exclude": []
 }

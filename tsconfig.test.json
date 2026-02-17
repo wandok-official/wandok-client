@@ -21,6 +21,10 @@
     "apps/extension/src/**/*.test.tsx",
     "apps/extension/src/**/__tests__/**/*.ts",
     "apps/extension/src/**/__tests__/**/*.tsx",
+    "apps/web/src/**/*.test.ts",
+    "apps/web/src/**/*.test.tsx",
+    "apps/web/src/**/__tests__/**/*.ts",
+    "apps/web/src/**/__tests__/**/*.tsx",
     "test/**/*.ts"
   ]
 }

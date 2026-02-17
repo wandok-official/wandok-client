@@ -17,23 +17,21 @@ test.describe('문단 분리', () => {
       return document.querySelectorAll('#paragraph-1 .wandok-text-wrapper').length;
     });
 
-    if (sentenceCount > 1) {
-      // 두 번째 문장을 클릭하여 문단 분리
-      await page.evaluate(() => {
-        const sentences = document.querySelectorAll('#paragraph-1 .wandok-text-wrapper');
-        if (sentences[1]) {
-          sentences[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        }
-      });
+    expect(sentenceCount).toBeGreaterThan(1);
 
-      await page.waitForTimeout(200);
+    // 두 번째 문장을 클릭하여 문단 분리
+    await page.evaluate(() => {
+      const sentences = document.querySelectorAll('#paragraph-1 .wandok-text-wrapper');
+      sentences[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
 
-      const newParagraphCount = await page.evaluate(() => {
-        return document.querySelectorAll('p').length;
-      });
+    await page.waitForTimeout(200);
 
-      expect(newParagraphCount).toBe(initialParagraphCount + 1);
-    }
+    const newParagraphCount = await page.evaluate(() => {
+      return document.querySelectorAll('p').length;
+    });
+
+    expect(newParagraphCount).toBe(initialParagraphCount + 1);
   });
 
   test('분리된 문단들도 독립적으로 블러가 동작해야 한다', async ({ context }) => {
@@ -47,36 +45,34 @@ test.describe('문단 분리', () => {
       return document.querySelectorAll('#paragraph-1 .wandok-text-wrapper').length;
     });
 
-    if (sentenceCount > 1) {
-      // 문단 분리
-      await page.evaluate(() => {
-        const sentences = document.querySelectorAll('#paragraph-1 .wandok-text-wrapper');
-        if (sentences[1]) {
-          sentences[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        }
-      });
+    expect(sentenceCount).toBeGreaterThan(1);
 
-      await page.waitForTimeout(200);
+    // 문단 분리
+    await page.evaluate(() => {
+      const sentences = document.querySelectorAll('#paragraph-1 .wandok-text-wrapper');
+      sentences[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
 
-      // 첫 번째 문단에 mouseenter
-      await page.evaluate(() => {
-        const wrapper = document.querySelector('p .wandok-text-wrapper');
-        if (wrapper) {
-          wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-        }
-      });
+    await page.waitForTimeout(200);
 
-      await page.waitForTimeout(200);
+    // 첫 번째 문단에 mouseenter
+    await page.evaluate(() => {
+      const wrapper = document.querySelector('p .wandok-text-wrapper');
+      if (wrapper) {
+        wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      }
+    });
 
-      const secondParagraphFilter = await page.evaluate(() => {
-        const paragraphs = document.querySelectorAll('p');
-        if (paragraphs[1]) {
-          return window.getComputedStyle(paragraphs[1]).filter;
-        }
-        return '';
-      });
+    await page.waitForTimeout(200);
 
-      expect(secondParagraphFilter).toContain('blur');
-    }
+    const secondParagraphFilter = await page.evaluate(() => {
+      const paragraphs = document.querySelectorAll('p');
+      if (paragraphs[1]) {
+        return window.getComputedStyle(paragraphs[1]).filter;
+      }
+      return '';
+    });
+
+    expect(secondParagraphFilter).toContain('blur');
   });
 });

@@ -149,6 +149,17 @@ describe('restoreSplitParagraphs', () => {
       expect(container.querySelectorAll('p').length).toBe(1);
       expect(container.querySelector('p')?.textContent).toBe('A');
     });
+
+    it('자식이 없는 빈 wandok-split-paragraph도 제거되어야 한다', () => {
+      container.innerHTML = '<p><span>A</span></p><p class="wandok-split-paragraph"></p>';
+      const splitP = container.querySelector('.wandok-split-paragraph') as HTMLElement;
+      allBlockElements.add(splitP);
+
+      restoreSplitParagraphs(allBlockElements);
+
+      expect(container.querySelectorAll('.wandok-split-paragraph').length).toBe(0);
+      expect(allBlockElements.has(splitP)).toBe(false);
+    });
   });
 
   // ==================== 멱등성 및 일관성 ====================
@@ -244,6 +255,26 @@ describe('restoreSplitParagraphs', () => {
       expect(container.querySelectorAll('p').length).toBe(1);
       expect(container.querySelector('strong')?.textContent).toBe('B');
       expect(container.querySelector('em')?.textContent).toBe('C');
+    });
+
+    it('비인접 분리 문단이 있어도 올바르게 복원해야 한다', () => {
+      // A의 분리 | 일반 문단 | B의 분리 구조
+      container.innerHTML =
+        '<p><span>A</span></p>' +
+        '<p class="wandok-split-paragraph"><span>A-split</span></p>' +
+        '<p><span>Normal</span></p>' +
+        '<p class="wandok-split-paragraph"><span>Normal-split</span></p>';
+
+      const splitPs = container.querySelectorAll<HTMLElement>('.wandok-split-paragraph');
+      splitPs.forEach((p) => allBlockElements.add(p));
+
+      restoreSplitParagraphs(allBlockElements);
+
+      expect(container.querySelectorAll('.wandok-split-paragraph').length).toBe(0);
+      const paragraphs = container.querySelectorAll('p');
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs[0].textContent).toBe('AA-split');
+      expect(paragraphs[1].textContent).toBe('NormalNormal-split');
     });
   });
 });

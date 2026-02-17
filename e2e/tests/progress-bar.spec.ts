@@ -57,9 +57,9 @@ test.describe('Progress Bar', () => {
 
     const scrolledHeight = await getProgressBarHeight();
 
-    if (initialHeight && scrolledHeight) {
-      expect(scrolledHeight).not.toBe(initialHeight);
-    }
+    expect(initialHeight).not.toBeNull();
+    expect(scrolledHeight).not.toBeNull();
+    expect(scrolledHeight).not.toBe(initialHeight);
   });
 
   test('페이지 하단으로 스크롤하면 Progress Bar가 끝까지 이동해야 한다', async ({ context }) => {
@@ -75,12 +75,21 @@ test.describe('Progress Bar', () => {
 
     await page.waitForTimeout(200);
 
-    const scrollPercentage = await page.evaluate(() => {
-      const scrollTop = window.scrollY;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      return (scrollTop / scrollHeight) * 100;
+    const indicatorHeightPercent = await page.evaluate(() => {
+      const host = document.getElementById('wandok-shadow-host');
+      const shadowRoot = host?.shadowRoot;
+      if (!shadowRoot) return null;
+
+      const progressContainer = shadowRoot.querySelector('.fixed.top-0.right-0');
+      const indicator = progressContainer?.querySelector('.bg-amber-500');
+      if (!indicator) return null;
+
+      // inline style에서 height 퍼센트 값 추출 (e.g. "98.5%")
+      const heightStyle = (indicator as HTMLElement).style.height;
+      return parseFloat(heightStyle);
     });
 
-    expect(scrollPercentage).toBeGreaterThan(90);
+    expect(indicatorHeightPercent).not.toBeNull();
+    expect(indicatorHeightPercent!).toBeGreaterThan(90);
   });
 });

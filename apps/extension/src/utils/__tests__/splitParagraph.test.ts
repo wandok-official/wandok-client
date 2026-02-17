@@ -54,6 +54,22 @@ describe('splitParagraph', () => {
       expect(newParagraph.classList.contains('wandok-split-paragraph')).toBe(true);
     });
 
+    it('wandok-text-wrapper가 중첩된 경우 실제 블록 요소를 찾아야 한다', () => {
+      container.innerHTML =
+        '<p>' +
+        '<span class="wandok-text-wrapper">' +
+        '<span class="wandok-text-wrapper inner">A</span>' +
+        '</span>' +
+        '<span class="s2">B</span>' +
+        '</p>';
+
+      const innerWrapper = container.querySelector('.inner') as HTMLElement;
+
+      splitParagraph(innerWrapper);
+
+      expect(container.querySelectorAll('p').length).toBe(1);
+    });
+
     it('마지막 자식 요소를 선택하면 새 문단은 마지막만 포함해야 한다', () => {
       container.innerHTML = '<p><span>First</span><span class="last">Last</span></p>';
       const lastElement = container.querySelector('.last') as HTMLElement;
@@ -86,8 +102,22 @@ describe('splitParagraph', () => {
       splitParagraph(spanInBody);
 
       expect(document.body.querySelectorAll('p').length).toBe(0);
-      
+
       document.body.removeChild(spanInBody);
+    });
+
+    it('selectedElement가 parentBlock.childNodes에 없으면 분리하지 않아야 한다', () => {
+      container.innerHTML =
+        '<p>' +
+        '<span class="wandok-text-wrapper"><span class="nested-target">A</span></span>' +
+        '<span>B</span>' +
+        '</p>';
+      const nestedTarget = container.querySelector('.nested-target') as HTMLElement;
+
+      splitParagraph(nestedTarget);
+
+      expect(container.querySelectorAll('p').length).toBe(1);
+      expect(container.querySelector('p')?.textContent).toBe('AB');
     });
 
     it('첫번째 자식 요소를 선택하면 원본은 비워야 한다', () => {
@@ -165,15 +195,15 @@ describe('splitParagraph', () => {
       const html = '<p><span class="s1">A</span>' +
         '<span class="s2">B</span><span class="s3">C</span></p>';
       container.innerHTML = html;
-      
+
       const s2 = container.querySelector('.s2') as HTMLElement;
       splitParagraph(s2);
-      
+
       expect(container.querySelectorAll('p').length).toBe(2);
-      
+
       const s3 = container.querySelector('.s3') as HTMLElement;
       splitParagraph(s3);
-      
+
       const paragraphs = container.querySelectorAll('p');
       expect(paragraphs.length).toBe(3);
       expect(paragraphs[0].textContent).toBe('A');

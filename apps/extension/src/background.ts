@@ -13,6 +13,17 @@ chrome.runtime.onInstalled.addListener((details) => {
   }
 });
 
+// 탭 로딩 완료 시 badge 상태를 storage와 동기화
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+  if (changeInfo.status === 'complete') {
+    const { wandokEnabled } = await chrome.storage.local.get('wandokEnabled');
+    await chrome.action.setBadgeText({
+      tabId,
+      text: wandokEnabled ? 'ON' : 'OFF',
+    });
+  }
+});
+
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id) return;
 
@@ -28,3 +39,5 @@ chrome.action.onClicked.addListener(async (tab) => {
   // storage에 상태 저장
   await chrome.storage.local.set({ wandokEnabled: isEnabled });
 });
+
+export {};
