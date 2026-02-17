@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+
 import type { StepStatus } from '../types/landingTypes';
 import { useStep1FocusModeDetection } from './useStep1FocusModeDetection';
 import { useStep2ParagraphSplitDetection } from './useStep2ParagraphSplitDetection';
