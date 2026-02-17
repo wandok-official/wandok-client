@@ -1,86 +1,82 @@
 import { createTestDOM } from '@test/helpers/test-utils';
 import { renderHook } from '@testing-library/react';
-import { beforeEach,describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useStep1FocusModeDetection } from '../useStep1FocusModeDetection';
 
-const STEP1_HTML = '<article data-guide-step="1"></article>';
-const WRAPPER_CLASS = 'wandok-text-wrapper';
-
-const createStep1WithWrapper = () => {
-  const { container } = createTestDOM(STEP1_HTML);
-  const article = container.querySelector('article')!;
-  const wrapper = document.createElement('span');
-  wrapper.className = WRAPPER_CLASS;
-  article.appendChild(wrapper);
-  return { article, wrapper };
-};
+const STEP1_HTML = '<article data-guide-step="1"><p>텍스트</p></article>';
 
 describe('useStep1FocusModeDetection', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
 
-  it('isCompleted가 true이면 observer를 설정하지 않아야 한다', () => {
+  it('isCompleted가 true이면 이벤트 리스너를 등록하지 않아야 한다', () => {
+    createTestDOM(STEP1_HTML);
+    const addSpy = vi.spyOn(window, 'addEventListener');
     const onComplete = vi.fn();
-    const observeSpy = vi.spyOn(MutationObserver.prototype, 'observe');
 
     renderHook(() => useStep1FocusModeDetection(true, onComplete));
 
-    expect(observeSpy).not.toHaveBeenCalled();
-    observeSpy.mockRestore();
+    const wandokCalls = addSpy.mock.calls.filter(([type]) => type === 'wandok:focus-hover');
+    expect(wandokCalls).toHaveLength(0);
+
+    addSpy.mockRestore();
   });
 
-  it('step1 영역 내 wrapper에 mouseenter 시 onComplete를 호출해야 한다', () => {
-    const { wrapper } = createStep1WithWrapper();
+  it('step1 요소가 DOM에 없으면 에러 없이 동작해야 한다', () => {
     const onComplete = vi.fn();
 
     renderHook(() => useStep1FocusModeDetection(false, onComplete));
 
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('step1 영역 내에서 wandok:focus-hover 수신 시 onComplete를 호출해야 한다', () => {
+    createTestDOM(STEP1_HTML);
+    const onComplete = vi.fn();
+    const step1Article = document.querySelector('article')!;
+    renderHook(() => useStep1FocusModeDetection(false, onComplete));
+
+    step1Article.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
-  it('step1 영역 밖 wrapper에는 리스너를 등록하지 않아야 한다', () => {
-    const { container } = createTestDOM('<div></div>');
-    const wrapper = document.createElement('span');
-    wrapper.className = WRAPPER_CLASS;
-    container.querySelector('div')!.appendChild(wrapper);
-
+  it('step1 영역 밖에서 wandok:focus-hover가 발생해도 무시해야 한다', () => {
+    createTestDOM(STEP1_HTML);
     const onComplete = vi.fn();
     renderHook(() => useStep1FocusModeDetection(false, onComplete));
 
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
 
     expect(onComplete).not.toHaveBeenCalled();
   });
 
-  it('동적으로 추가된 wrapper에도 리스너를 등록해야 한다', async () => {
+  it('step1 영역에 진입 후 이탈하면 무시해야 한다', () => {
     createTestDOM(STEP1_HTML);
     const onComplete = vi.fn();
-
+    const step1Article = document.querySelector('article')!;
     renderHook(() => useStep1FocusModeDetection(false, onComplete));
 
-    const article = document.querySelector('article')!;
-    const dynamicWrapper = document.createElement('span');
-    dynamicWrapper.className = WRAPPER_CLASS;
-    article.appendChild(dynamicWrapper);
+    step1Article.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    step1Article.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
 
-    await vi.waitFor(() => {
-      dynamicWrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-      expect(onComplete).toHaveBeenCalledTimes(1);
-    });
+    expect(onComplete).not.toHaveBeenCalled();
   });
 
   it('onComplete가 중복 호출되지 않아야 한다', () => {
-    const { wrapper } = createStep1WithWrapper();
+    createTestDOM(STEP1_HTML);
     const onComplete = vi.fn();
-
+    const step1Article = document.querySelector('article')!;
     renderHook(() => useStep1FocusModeDetection(false, onComplete));
 
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-    wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    step1Article.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
+    window.dispatchEvent(new CustomEvent('wandok:focus-hover'));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
   });

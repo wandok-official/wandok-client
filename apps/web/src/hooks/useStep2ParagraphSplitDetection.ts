@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-const WANDOK_TEXT_WRAPPER_CLASS = 'wandok-text-wrapper';
 const STEP2_SELECTOR = 'article[data-guide-step="2"]';
 
 /**
@@ -12,35 +11,37 @@ export const useStep2ParagraphSplitDetection = (
   onComplete: () => void,
 ) => {
   const splitDetected = useRef(false);
+  const isInsideStep2 = useRef(false);
 
   useEffect(() => {
     if (isCompleted) return;
 
-    const isParagraphWithWrapper = (element: HTMLElement): boolean => {
-      return (
-        element.tagName === 'P' &&
-        element.closest(STEP2_SELECTOR) !== null &&
-        element.querySelector(`.${WANDOK_TEXT_WRAPPER_CLASS}`) !== null
-      );
+    const step2Article = document.querySelector(STEP2_SELECTOR);
+    if (!step2Article) return;
+
+    const handleMouseEnter = () => {
+      isInsideStep2.current = true;
+    };
+    const handleMouseLeave = () => {
+      isInsideStep2.current = false;
     };
 
-    const detectParagraphSplit = (mutations: MutationRecord[]) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType !== Node.ELEMENT_NODE) return;
+    step2Article.addEventListener('mouseenter', handleMouseEnter);
+    step2Article.addEventListener('mouseleave', handleMouseLeave);
 
-          const element = node as HTMLElement;
-          if (isParagraphWithWrapper(element) && !splitDetected.current) {
-            splitDetected.current = true;
-            onComplete();
-          }
-        });
-      });
+    const handleSplit = () => {
+      if (!splitDetected.current && isInsideStep2.current) {
+        splitDetected.current = true;
+        onComplete();
+      }
     };
 
-    const observer = new MutationObserver(detectParagraphSplit);
-    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('wandok:paragraph-split', handleSplit);
 
-    return () => observer.disconnect();
+    return () => {
+      step2Article.removeEventListener('mouseenter', handleMouseEnter);
+      step2Article.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('wandok:paragraph-split', handleSplit);
+    };
   }, [isCompleted, onComplete]);
 };
