@@ -6,6 +6,7 @@ import { BLOCK_SELECTOR } from './config/constants';
 import { applyBlurEffect } from './utils/applyBlurEffect';
 import { extractTextNodes } from './utils/extractTextNodes';
 import { restoreSplitParagraphs } from './utils/restoreSplitParagraphs';
+import { restoreTextWrappers } from './utils/restoreTextWrappers';
 import { segmentSentences } from './utils/segmentSentences';
 import { splitParagraph } from './utils/splitParagraph';
 
@@ -17,7 +18,7 @@ interface StorageData {
 const allBlockElements = new Set<HTMLElement>();
 
 // 이미 처리된 텍스트 노드를 추적하여 중복 처리 방지
-const processedNodes = new WeakSet<Node>();
+let processedNodes = new WeakSet<Node>();
 
 let isEnabled = false;
 
@@ -84,18 +85,18 @@ const processTextNode = (textNode: Node) => {
     sentenceSpan.classList.add('wandok-text-wrapper');
 
     // [기능 1] 클릭 시 문단 분리
-    sentenceSpan.addEventListener('click', (e) => {
+    // setTimeout으로 지연하여 호스트 페이지의 이벤트 전파가 완료된 후 DOM을 변경
+    sentenceSpan.addEventListener('click', () => {
       if (!isEnabled) return;
-      e.stopPropagation();
 
-      // 1. 문단 분리 실행 (이 과정에서 sentenceSpan의 부모가 바뀜)
-      splitParagraph(sentenceSpan);
+      setTimeout(() => {
+        splitParagraph(sentenceSpan);
 
-      // 2. 분리되어 새로 생성된 문단을 관리 대상 Set에 추가
-      const newParent = getClosestBlock(sentenceSpan);
-      if (newParent) {
-        allBlockElements.add(newParent);
-      }
+        const newParent = getClosestBlock(sentenceSpan);
+        if (newParent) {
+          allBlockElements.add(newParent);
+        }
+      }, 0);
     });
 
     // [기능 2] 마우스 호버 시 블러 처리
@@ -178,6 +179,7 @@ const initFocusMode = () => {
       if (!shadowHost.parentNode) {
         document.body.appendChild(shadowHost);
       }
+      processElement(document.body);
     } else {
       shadowHost.remove();
     }
@@ -199,6 +201,9 @@ const initFocusMode = () => {
       if (!enabled) {
         clearAllBlurEffects();
         restoreSplitParagraphs(allBlockElements);
+        restoreTextWrappers();
+        allBlockElements.clear();
+        processedNodes = new WeakSet();
       }
     }
   });

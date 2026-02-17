@@ -283,7 +283,7 @@ describe('Content Script 통합 테스트', () => {
   });
 
   describe('비활성 상태 동작', () => {
-    it('OFF 상태에서 wandok-text-wrapper 클릭 시 문단이 분리되지 않아야 한다', async () => {
+    it('OFF 전환 시 wandok-text-wrapper가 제거되어 클릭할 대상이 없어야 한다', async () => {
       await setupOnState();
 
       const spans = document.querySelectorAll('.wandok-text-wrapper');
@@ -291,45 +291,61 @@ describe('Content Script 통합 테스트', () => {
 
       await triggerOff();
 
-      const initialParagraphs = document.querySelectorAll('article p').length;
-
-      const span = document.querySelector('.wandok-text-wrapper') as HTMLElement;
-      if (span) {
-        span.click();
-      }
-
-      expect(document.querySelectorAll('article p').length).toBe(initialParagraphs);
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBe(0);
       expect(document.querySelectorAll('.wandok-split-paragraph').length).toBe(0);
     });
 
-    it('OFF 상태에서 마우스 호버 시 블러 효과가 적용되지 않아야 한다', async () => {
+    it('OFF 전환 시 wandok-text-wrapper가 모두 제거되고 원본 텍스트가 복원되어야 한다', async () => {
       const html = `
         <article>
           <p>첫 번째 문장입니다. 두 번째 문장입니다.</p>
           <p>세 번째 문장입니다. 네 번째 문장입니다.</p>
         </article>
       `;
+
       await setupOnState(html);
 
-      const spans = document.querySelectorAll('.wandok-text-wrapper');
-      expect(spans.length).toBeGreaterThan(0);
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBeGreaterThan(0);
 
       await triggerOff();
 
-      const firstSpan = spans[0] as HTMLElement;
-      await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-        await waitForDom();
-      });
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBe(0);
 
-      expect(document.querySelectorAll('.wandok-blur').length).toBe(0);
+      const paragraphs = document.querySelectorAll('article p');
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs[0].textContent).toContain('첫 번째 문장입니다.');
+      expect(paragraphs[1].textContent).toContain('세 번째 문장입니다.');
+    });
+  });
 
-      await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
-        await waitForDom();
-      });
+  describe('이벤트 전파', () => {
+    it('ON 상태에서 wandok-text-wrapper 클릭 시 부모 요소로 이벤트가 전파되어야 한다', async () => {
+      await setupOnState();
 
-      expect(document.querySelectorAll('.wandok-blur').length).toBe(0);
+      const article = document.querySelector('article') as HTMLElement;
+      const clickHandler = vi.fn();
+      article.addEventListener('click', clickHandler);
+
+      const span = document.querySelector('.wandok-text-wrapper') as HTMLElement;
+      span.click();
+
+      expect(clickHandler).toHaveBeenCalledTimes(1);
+
+      article.removeEventListener('click', clickHandler);
+    });
+
+    it('ON 상태에서 클릭 이벤트가 document까지 전파되어야 한다', async () => {
+      await setupOnState();
+
+      const clickHandler = vi.fn();
+      document.addEventListener('click', clickHandler);
+
+      const span = document.querySelector('.wandok-text-wrapper') as HTMLElement;
+      span.click();
+
+      expect(clickHandler).toHaveBeenCalledTimes(1);
+
+      document.removeEventListener('click', clickHandler);
     });
   });
 
@@ -446,6 +462,127 @@ describe('Content Script 통합 테스트', () => {
 
       const wrappers = container.querySelectorAll('.wandok-text-wrapper');
       expect(wrappers.length).toBe(1);
+    });
+  });
+
+  describe('OFF → ON 재활성화', () => {
+    /**
+     * storage 변경 이벤트를 발생시켜 ON 전환을 트리거하는 헬퍼
+     */
+    const triggerOn = async () => {
+      type StorageChangeListener = (
+        changes: {
+          [key: string]: chrome.storage.StorageChange;
+        },
+        areaName: string,
+      ) => void;
+
+      const calls = vi.mocked(
+        chrome.storage.onChanged.addListener,
+      ).mock.calls;
+
+      const changes = {
+        wandokEnabled: {
+          newValue: true,
+          oldValue: false,
+        },
+      };
+
+      await act(() => {
+        calls.forEach(([listener]) => {
+          (listener as StorageChangeListener)(
+            changes,
+            'local',
+          );
+        });
+      });
+    };
+
+    it('OFF → ON 재활성화 시 텍스트가 다시 래핑되어야 한다', async () => {
+      await setupOnState();
+
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBeGreaterThan(0);
+
+      await triggerOff();
+
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBe(0);
+
+      await triggerOn();
+      await act(async () => {
+        await waitForDom();
+      });
+
+      expect(document.querySelectorAll('.wandok-text-wrapper').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('OFF 전환 시 원본 텍스트 복원', () => {
+    it('문장 사이 공백이 보존되어야 한다', async () => {
+      const html = `
+        <article>
+          <p>첫 번째 문장입니다. 두 번째 문장입니다.</p>
+        </article>
+      `;
+      await setupOnState(html);
+
+      const p = document.querySelector('article p') as HTMLElement;
+      expect(p.querySelectorAll('.wandok-text-wrapper').length).toBeGreaterThan(0);
+
+      await triggerOff();
+
+      expect(p.textContent).toBe('첫 번째 문장입니다. 두 번째 문장입니다.');
+    });
+
+    it('약어가 포함된 텍스트의 공백이 보존되어야 한다', async () => {
+      const html = `
+        <article>
+          <p>Mr. Smith visited Dr. Lee at the hospital. Prof. Kim was also there.</p>
+        </article>
+      `;
+      await setupOnState(html);
+
+      await triggerOff();
+
+      const p = document.querySelector('article p') as HTMLElement;
+      expect(p.textContent).toBe(
+        'Mr. Smith visited Dr. Lee at the hospital. Prof. Kim was also there.',
+      );
+    });
+
+    it('한영 혼합 텍스트의 공백이 보존되어야 한다', async () => {
+      const html = `
+        <article>
+          <p>안녕하세요, 제 이름은 Alice 입니다. Bob의 친구입니다.</p>
+        </article>
+      `;
+      await setupOnState(html);
+
+      await triggerOff();
+
+      const p = document.querySelector('article p') as HTMLElement;
+      expect(p.textContent).toBe('안녕하세요, 제 이름은 Alice 입니다. Bob의 친구입니다.');
+    });
+
+    it('문단 분리 후 복원해도 원본 텍스트가 보존되어야 한다', async () => {
+      const html = `
+        <article>
+          <p>첫 번째 문장입니다. 두 번째 문장입니다. 세 번째 문장입니다.</p>
+        </article>
+      `;
+      await setupOnState(html);
+
+      const secondSpan = document.querySelectorAll('.wandok-text-wrapper')[1] as HTMLElement;
+      splitParagraph(secondSpan);
+
+      expect(document.querySelectorAll('.wandok-split-paragraph').length).toBe(1);
+
+      await triggerOff();
+
+      const paragraphs = document.querySelectorAll('article p');
+      expect(paragraphs.length).toBe(1);
+      expect(paragraphs[0].textContent).toBe(
+        '첫 번째 문장입니다. 두 번째 문장입니다. 세 번째 문장입니다.',
+      );
     });
   });
 

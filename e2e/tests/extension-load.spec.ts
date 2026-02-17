@@ -41,4 +41,33 @@ test.describe('확장 프로그램 로드', () => {
 
     expect(wrapperCount).toBeGreaterThan(0);
   });
+
+  test('클릭 이벤트가 부모 요소로 전파되어야 한다', async ({ context }) => {
+    const page = await context.newPage();
+    await page.goto('http://localhost:3333/test-page.html');
+
+    await activateExtension(context, page);
+    await waitForShadowHost(page);
+
+    const propagated = await page.evaluate(() => {
+      return new Promise<boolean>((resolve) => {
+        const article = document.querySelector('article');
+        if (!article) {
+          resolve(false);
+          return;
+        }
+
+        article.addEventListener('click', () => resolve(true), { once: true });
+
+        const wrapper = document.querySelector('.wandok-text-wrapper');
+        if (wrapper) {
+          wrapper.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        } else {
+          resolve(false);
+        }
+      });
+    });
+
+    expect(propagated).toBe(true);
+  });
 });
