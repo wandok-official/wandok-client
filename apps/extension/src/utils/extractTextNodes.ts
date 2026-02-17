@@ -19,10 +19,6 @@ export const extractTextNodes = (
           return NodeFilter.FILTER_REJECT;
         }
 
-        if (node.parentElement?.classList.contains('wandok-text-wrapper')) {
-          return NodeFilter.FILTER_REJECT;
-        }
-
         return NodeFilter.FILTER_ACCEPT;
       },
     },
