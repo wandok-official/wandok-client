@@ -10,7 +10,8 @@ import { useGuideProgress } from '../hooks/useGuideProgress';
 
 const LandingPage = () => {
   const extensionState = useExtensionState();
-  const { stepStatus, completedCount, isGuideComplete } = useGuideProgress();
+  const isActive = extensionState === 'active';
+  const { stepStatus, completedCount, isGuideComplete } = useGuideProgress(isActive);
 
   const isStepCompleted = (stepNumber: 1 | 2 | 3): boolean => {
     return stepStatus[`step${stepNumber}`];
@@ -21,7 +22,7 @@ const LandingPage = () => {
       <div className="flex-1">
         <HeroSection />
 
-        {extensionState === 'active' && (
+        {isActive && (
           <>
             <GuideBar stepStatus={stepStatus} completedCount={completedCount} />
 

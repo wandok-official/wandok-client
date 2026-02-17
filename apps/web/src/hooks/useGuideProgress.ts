@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+
 import type { StepStatus } from '../types/landingTypes';
 import { useStep1FocusModeDetection } from './useStep1FocusModeDetection';
 import { useStep2ParagraphSplitDetection } from './useStep2ParagraphSplitDetection';
@@ -13,7 +14,7 @@ interface UseGuideProgressReturn {
 /**
  * 가이드 진행 상태를 관리하는 커스텀 훅
  */
-export const useGuideProgress = (): UseGuideProgressReturn => {
+export const useGuideProgress = (enabled: boolean): UseGuideProgressReturn => {
   const [stepStatus, setStepStatus] = useState<StepStatus>({
     step1: false,
     step2: false,
@@ -32,9 +33,9 @@ export const useGuideProgress = (): UseGuideProgressReturn => {
     setStepStatus((prev) => ({ ...prev, step3: true }));
   }, []);
 
-  useStep1FocusModeDetection(stepStatus.step1, completeStep1);
-  useStep2ParagraphSplitDetection(stepStatus.step2, completeStep2);
-  useStep3ScrollProgressDetection(stepStatus.step3, completeStep3);
+  useStep1FocusModeDetection(stepStatus.step1 || !enabled, completeStep1);
+  useStep2ParagraphSplitDetection(stepStatus.step2 || !enabled, completeStep2);
+  useStep3ScrollProgressDetection(stepStatus.step3 || !enabled, completeStep3);
 
   const completedCount = Object.values(stepStatus).filter(Boolean).length;
   const isGuideComplete = completedCount === 3;
