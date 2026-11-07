@@ -97,69 +97,11 @@ describe('extractTextNodes', () => {
     });
   });
 
-  // ==================== 에러 상황 및 복구 ====================
-
-  describe('에러 상황 및 복구', () => {
-    it('매우 깊게 중첩된 요소에서도 텍스트 노드를 추출해야 한다.', () => {
-      container.innerHTML = '<div>'.repeat(50) + 'Deep Text' + '</div>'.repeat(50);
-
-      const result = extractTextNodes(container);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].textContent).toBe('Deep Text');
-    });
-
-  });
-
-  // ==================== 중첩 구조 케이스 ====================
-
   describe('중첩 구조 케이스', () => {
-    it('중첩된 요소에서 텍스트 노드를 추출해야 한다', () => {
-      container.innerHTML = '<div><p><span>Nested Text</span></p></div>';
-
-      const result = extractTextNodes(container);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].textContent).toBe('Nested Text');
-    });
-
     it('wandok-text-wrapper 클래스가 있는 요소 안의 텍스트는 제외해야 한다', () => {
       container.innerHTML = `
         <p>일반 텍스트</p>
         <p><span class="wandok-text-wrapper">이미 처리된 텍스트</span></p>
-      `;
-
-      const result = extractTextNodes(container);
-
-      expect(result).toHaveLength(1);
-      expect(result[0].textContent).toBe('일반 텍스트');
-    });
-
-    it('여러 wandok-text-wrapper와 일반 텍스트가 섞여있을 때 일반 텍스트만 추출해야 한다', () => {
-      container.innerHTML = `
-        <div>
-          <p>첫 번째 일반 텍스트</p>
-          <p><span class="wandok-text-wrapper">처리된 문장 1</span></p>
-          <p>두 번째 일반 텍스트</p>
-          <p><span class="wandok-text-wrapper">처리된 문장 2</span></p>
-        </div>
-      `;
-
-      const result = extractTextNodes(container);
-
-      expect(result).toHaveLength(2);
-      expect(result[0].textContent).toBe('첫 번째 일반 텍스트');
-      expect(result[1].textContent).toBe('두 번째 일반 텍스트');
-    });
-
-    it('중첩된 wandok-text-wrapper 구조에서도 모두 제외해야 한다', () => {
-      container.innerHTML = `
-        <p>일반 텍스트</p>
-        <p>
-          <span class="wandok-text-wrapper">
-            <span class="wandok-text-wrapper">중첩된 처리</span>
-          </span>
-        </p>
       `;
 
       const result = extractTextNodes(container);

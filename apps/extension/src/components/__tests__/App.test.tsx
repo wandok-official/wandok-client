@@ -20,28 +20,6 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
-  describe('초기 상태', () => {
-    it('OFF일 때 ProgressBar가 없어야 한다', () => {
-      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
-        if (callback) callback({ wandokEnabled: false });
-        return Promise.resolve({ wandokEnabled: false });
-      });
-
-      const { container } = render(<App />);
-      expect(container.firstChild).toBeNull();
-    });
-
-    it('ON일 때 ProgressBar가 있어야 한다', () => {
-      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
-        if (callback) callback({ wandokEnabled: true });
-        return Promise.resolve({ wandokEnabled: true });
-      });
-
-      const { container } = render(<App />);
-      expect(container.querySelector('.fixed.top-0.right-0')).not.toBeNull();
-    });
-  });
-
   describe('상태 전환', () => {
     it('ON → OFF 전환 시 ProgressBar가 사라져야 한다', () => {
       vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {

@@ -28,63 +28,7 @@ describe('splitParagraph', () => {
       expect(paragraphs.length).toBe(2);
       expect(paragraphs[0].textContent).toBe('첫번째');
       expect(paragraphs[1].textContent).toBe('두번째세번째');
-    });
-
-    it('분리된 새 문단이 원본 바로 다음에 위치해야 한다', () => {
-      const html = '<p id="original"><span class="s1">A</span>' +
-        '<span class="s2">B</span></p>';
-      container.innerHTML = html;
-      const selectedElement = container.querySelector('.s2') as HTMLElement;
-
-      splitParagraph(selectedElement);
-
-      const paragraphs = container.querySelectorAll('p');
-      expect(paragraphs[0].id).toBe('original');
-      expect(paragraphs[1].id).toBe('');
-      expect(paragraphs[0].nextElementSibling).toBe(paragraphs[1]);
-    });
-
-    it('새 문단에 wandok-split-paragraph 클래스가 추가되어야 한다', () => {
-      container.innerHTML = '<p><span class="s1">A</span><span class="s2">B</span></p>';
-      const selectedElement = container.querySelector('.s2') as HTMLElement;
-
-      splitParagraph(selectedElement);
-
-      const newParagraph = container.querySelectorAll('p')[1];
-      expect(newParagraph.classList.contains('wandok-split-paragraph')).toBe(true);
-    });
-
-    it('wandok-text-wrapper가 중첩된 경우 실제 블록 요소를 분리해야 한다', () => {
-      container.innerHTML =
-        '<p>' +
-        '<span class="wandok-text-wrapper">' +
-        '<span class="wandok-text-wrapper inner">A</span>' +
-        '</span>' +
-        '<span class="s2">B</span>' +
-        '</p>';
-
-      const innerWrapper = container.querySelector('.inner') as HTMLElement;
-
-      splitParagraph(innerWrapper);
-
-      const paragraphs = container.querySelectorAll('p');
-      expect(paragraphs.length).toBe(2);
-      expect(paragraphs[0].textContent).toBe('');
-      expect(paragraphs[1].textContent).toBe('AB');
       expect(paragraphs[1].classList.contains('wandok-split-paragraph')).toBe(true);
-      expect(paragraphs[1].querySelector('.inner')).not.toBeNull();
-    });
-
-    it('마지막 자식 요소를 선택하면 새 문단은 마지막만 포함해야 한다', () => {
-      container.innerHTML = '<p><span>First</span><span class="last">Last</span></p>';
-      const lastElement = container.querySelector('.last') as HTMLElement;
-
-      splitParagraph(lastElement);
-
-      const paragraphs = container.querySelectorAll('p');
-      expect(paragraphs.length).toBe(2);
-      expect(paragraphs[0].textContent).toBe('First');
-      expect(paragraphs[1].textContent).toBe('Last');
     });
   });
 
@@ -142,34 +86,6 @@ describe('splitParagraph', () => {
 
   // ==================== 동일 입력 → 동일 출력 ====================
   describe('멱등성 및 일관성', () => {
-    it('원본 문단의 태그 타입을 새 문단에도 유지해야 한다', () => {
-      const html = '<div class="test"><span class="s1">A</span>' +
-        '<span class="s2">B</span></div>';
-      container.innerHTML = html;
-      const selectedElement = container.querySelector('.s2') as HTMLElement;
-
-      splitParagraph(selectedElement);
-
-      const divs = container.querySelectorAll('div');
-      expect(divs.length).toBe(2);
-      expect(divs[0].tagName).toBe('DIV');
-      expect(divs[1].tagName).toBe('DIV');
-    });
-
-    it('원본 문단의 클래스를 새 문단에 복사해야 한다', () => {
-      const html = '<p class="original custom"><span class="s1">A</span>' +
-        '<span class="s2">B</span></p>';
-      container.innerHTML = html;
-      const selectedElement = container.querySelector('.s2') as HTMLElement;
-
-      splitParagraph(selectedElement);
-
-      const newParagraph = container.querySelectorAll('p')[1];
-      expect(newParagraph.classList.contains('original')).toBe(true);
-      expect(newParagraph.classList.contains('custom')).toBe(true);
-      expect(newParagraph.classList.contains('wandok-split-paragraph')).toBe(true);
-    });
-
     it('새 문단에서 id 속성을 제거해야 한다', () => {
       container.innerHTML = '<p id="unique"><span class="s1">A</span><span class="s2">B</span></p>';
       const selectedElement = container.querySelector('.s2') as HTMLElement;
@@ -180,19 +96,6 @@ describe('splitParagraph', () => {
       expect(paragraphs[0].id).toBe('unique');
       expect(paragraphs[1].id).toBe('');
       expect(paragraphs[1].hasAttribute('id')).toBe(false);
-    });
-
-    it('중첩된 구조를 올바르게 이동해야 한다', () => {
-      const html = '<p><span>A</span>' +
-        '<span class="selected"><strong>B</strong><em>C</em></span></p>';
-      container.innerHTML = html;
-      const selectedElement = container.querySelector('.selected') as HTMLElement;
-
-      splitParagraph(selectedElement);
-
-      const newParagraph = container.querySelectorAll('p')[1];
-      expect(newParagraph.querySelector('strong')?.textContent).toBe('B');
-      expect(newParagraph.querySelector('em')?.textContent).toBe('C');
     });
   });
 

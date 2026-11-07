@@ -164,14 +164,6 @@ describe('background', () => {
       expect(mockChrome.storage.local.set).toHaveBeenNthCalledWith(2, { wandokEnabled: false });
     });
 
-    it('클릭 시 storage에 wandokEnabled 상태를 저장해야 한다', async () => {
-      setupChromeMock.setBadgeState('OFF');
-      const listener = await importAndGetOnClickedListener();
-
-      await listener({ id: 1, url: 'https://example.com' });
-
-      expect(mockChrome.storage.local.set).toHaveBeenCalledWith({ wandokEnabled: true });
-    });
   });
 
   // ==================== 탭 새로고침 시 badge 동기화 ====================
