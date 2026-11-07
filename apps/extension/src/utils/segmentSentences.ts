@@ -8,10 +8,13 @@ const PLACEHOLDER = '\u0000DOT\u0000';
  * **처리 과정**
  * 1. **전처리**: 약어(Mr., Dr. 등)의 마침표를 placeholder로 치환하여 문장 분리 오류 방지
  * 2. **문장 분리**: Intl.Segmenter를 사용하여 한/영 다국어 문장 경계 인식
- * 3. **후처리**: placeholder를 마침표로 복원하고 공백 제거
+ * 3. **후처리**: placeholder를 마침표로 복원. 문장 뒤 공백은 그대로 둔다.
+ *
+ * Intl.Segmenter는 문장 사이 공백을 앞 문장에 붙여 돌려준다.
+ * 여기서 공백을 지우면 인접 span을 이어 붙일 때 "문장.다음"처럼 붙는다.
  *
  * @param text 분리할 원본 텍스트
- * @returns 분리된 문장들의 배열
+ * @returns 분리된 문장들의 배열. 문장 사이 공백은 앞 문장 끝에 포함된다.
  */
 export const segmentSentences = (text: string): string[] => {
   if (!text) return [];
@@ -25,5 +28,5 @@ export const segmentSentences = (text: string): string[] => {
   const segmenter = new Intl.Segmenter(['ko', 'en'], { granularity: 'sentence' });
   const segments = Array.from(segmenter.segment(processed)).map((s) => s.segment);
 
-  return segments.map((s) => s.replace(new RegExp(PLACEHOLDER, 'g'), '.').trim());
+  return segments.map((s) => s.replace(new RegExp(PLACEHOLDER, 'g'), '.'));
 };

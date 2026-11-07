@@ -11,10 +11,12 @@ describe('segmentSentences', () => {
       const text = 'First sentence. Second sentence. Third sentence.';
       const result = segmentSentences(text);
 
-      expect(result).toHaveLength(3);
-      expect(result[0]).toBe('First sentence.');
-      expect(result[1]).toBe('Second sentence.');
-      expect(result[2]).toBe('Third sentence.');
+      expect(result).toEqual([
+        'First sentence. ',
+        'Second sentence. ',
+        'Third sentence.',
+      ]);
+      expect(result.join('')).toBe(text);
     });
   });
 
@@ -36,12 +38,11 @@ describe('segmentSentences', () => {
     });
 
     it('줄임표가 포함된 문장을 올바르게 처리해야 한다', () => {
-      const result = segmentSentences('Wait... Really? Yes.');
+      const text = 'Wait... Really? Yes.';
+      const result = segmentSentences(text);
 
-      expect(result).toHaveLength(3);
-      expect(result[0]).toBe('Wait...');
-      expect(result[1]).toBe('Really?');
-      expect(result[2]).toBe('Yes.');
+      expect(result).toEqual(['Wait... ', 'Really? ', 'Yes.']);
+      expect(result.join('')).toBe(text);
     });
   });
 
@@ -52,18 +53,52 @@ describe('segmentSentences', () => {
       const text = '안녕하세요, 제 이름은 Alice 입니다. Bob의 친구입니다.';
       const result = segmentSentences(text);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toBe('안녕하세요, 제 이름은 Alice 입니다.');
-      expect(result[1]).toBe('Bob의 친구입니다.');
+      expect(result).toEqual([
+        '안녕하세요, 제 이름은 Alice 입니다. ',
+        'Bob의 친구입니다.',
+      ]);
+      expect(result.join('')).toBe(text);
     });
 
     it('영어 호칭(title, honorific)이 포함된 경우, 문장 단위로 분리되어야 한다.', () => {
       const text = 'Where is Mr. Kim? Dr. Kim is over there.';
       const result = segmentSentences(text);
 
-      expect(result).toHaveLength(2);
-      expect(result[0]).toBe('Where is Mr. Kim?');
-      expect(result[1]).toBe('Dr. Kim is over there.');
+      expect(result).toEqual([
+        'Where is Mr. Kim? ',
+        'Dr. Kim is over there.',
+      ]);
+      expect(result.join('')).toBe(text);
+    });
+
+    it('한국어 종결 뒤 공백을 유지해야 한다.', () => {
+      const text = '고정했습니다. Playwright 테스트가 통과했습니다. Playwright';
+      const result = segmentSentences(text);
+
+      expect(result).toEqual([
+        '고정했습니다. ',
+        'Playwright 테스트가 통과했습니다. ',
+        'Playwright',
+      ]);
+      expect(result.join('')).toBe(text);
+    });
+
+    it('원래 공백이 없는 문장은 공백을 만들지 않아야 한다.', () => {
+      const text = '통과했습니다.Playwright';
+
+      expect(segmentSentences(text).join('')).toBe(text);
+    });
+
+    it('문장 사이 줄바꿈은 버려지지 않아야 한다.', () => {
+      const text = 'First sentence.\n\nSecond sentence.';
+      const result = segmentSentences(text);
+
+      expect(result).toEqual([
+        'First sentence.\n',
+        '\n',
+        'Second sentence.',
+      ]);
+      expect(result.join('')).toBe(text);
     });
   });
 });
