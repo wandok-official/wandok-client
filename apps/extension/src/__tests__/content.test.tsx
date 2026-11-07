@@ -110,6 +110,30 @@ describe('Content Script 통합 테스트', () => {
       expect(shadowHost).toBeNull();
     });
 
+    it('활성화 이벤트는 document로 전달해야 한다', async () => {
+      const onDocument = vi.fn();
+      const onWindow = vi.fn();
+      document.addEventListener('wandok:activated', onDocument);
+      window.addEventListener('wandok:activated', onWindow);
+
+      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
+        if (callback) callback({ wandokEnabled: true });
+        return Promise.resolve({ wandokEnabled: true });
+      });
+
+      vi.resetModules();
+      await act(async () => {
+        await import('../content');
+        await waitForDom();
+      });
+
+      expect(onDocument).toHaveBeenCalled();
+      expect(onWindow).not.toHaveBeenCalled();
+
+      document.removeEventListener('wandok:activated', onDocument);
+      window.removeEventListener('wandok:activated', onWindow);
+    });
+
     it('ON일 때 ProgressBar가 있어야 한다', async () => {
       vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
         if (callback) callback({ wandokEnabled: true });
@@ -334,6 +358,27 @@ describe('Content Script 통합 테스트', () => {
   });
 
   describe('이벤트 핸들러', () => {
+    it('인라인 요소 안의 문장을 클릭해도 문단이 분리되어야 한다', async () => {
+      const html = `
+        <article>
+          <p><strong>첫 번째 문장입니다. 두 번째 문장입니다.</strong></p>
+          <p>세 번째 문장입니다.</p>
+        </article>
+      `;
+      await setupOnState(html);
+
+      const strongSpans = document.querySelectorAll('strong .wandok-text-wrapper');
+      expect(strongSpans.length).toBeGreaterThan(1);
+
+      await act(async () => {
+        (strongSpans[1] as HTMLElement).click();
+        await waitForDom();
+      });
+
+      expect(document.querySelectorAll('article p').length).toBe(3);
+      expect(document.querySelectorAll('.wandok-split-paragraph').length).toBe(1);
+    });
+
     it('ON 상태에서 wandok-text-wrapper 클릭 시 문단이 분리되어야 한다', async () => {
       await setupOnState();
 

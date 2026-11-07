@@ -137,9 +137,7 @@ const processElement = (element: HTMLElement) => {
  * 모든 블러 효과 제거
  */
 const clearAllBlurEffects = () => {
-  allBlockElements.forEach((element) => {
-    element.classList.remove('wandok-blur');
-  });
+  applyBlurEffect(document.body, allBlockElements, false);
 };
 
 const initFocusMode = () => {
@@ -181,7 +179,11 @@ const initFocusMode = () => {
     } else {
       shadowHost.remove();
     }
-    window.dispatchEvent(new CustomEvent(enabled ? 'wandok:activated' : 'wandok:deactivated'));
+    // content script의 window는 페이지 window와 다른 월드다.
+    // 랜딩 페이지 리스너가 받으려면 공유 DOM인 document로 보내야 한다.
+    document.dispatchEvent(
+      new CustomEvent(enabled ? 'wandok:activated' : 'wandok:deactivated'),
+    );
   };
 
   chrome.storage.local.get('wandokEnabled', (result: StorageData) => {

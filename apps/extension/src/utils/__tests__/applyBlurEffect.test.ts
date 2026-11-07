@@ -86,6 +86,28 @@ describe('applyBlurEffect', () => {
       expect(block1.classList.contains('wandok-blur')).toBe(false);
     });
 
+    it('DOM에서 떨어진 블록은 블러 대상에서 제거해야 한다', () => {
+      const detached = document.createElement('p');
+      detached.classList.add('wandok-blur');
+      allBlocks.add(detached);
+
+      applyBlurEffect(block2, allBlocks, true);
+
+      expect(allBlocks.has(detached)).toBe(false);
+      expect(block1.classList.contains('wandok-blur')).toBe(true);
+      expect(block2.classList.contains('wandok-blur')).toBe(false);
+    });
+
+    it('마우스가 나갈 때도 떨어진 블록을 제거해야 한다', () => {
+      const detached = document.createElement('p');
+      allBlocks.add(detached);
+
+      applyBlurEffect(block1, allBlocks, false);
+
+      expect(allBlocks.has(detached)).toBe(false);
+      expect(allBlocks.size).toBe(3);
+    });
+
     it('타겟이 Set에 없어도 다른 블록들은 blur 처리되어야 한다', () => {
       const outsideBlock = document.createElement('p');
       outsideBlock.textContent = '외부 블록';

@@ -240,6 +240,24 @@ describe('restoreSplitParagraphs', () => {
       expect(restored[1].textContent).toBe('CD');
     });
 
+    it('인라인 요소 안에서 분리한 문단도 텍스트 순서를 복원해야 한다', () => {
+      container.innerHTML =
+        '<p><strong><span class="s1">A</span><span class="s2">B</span></strong>' +
+        '<span class="s3">C</span></p>';
+      const originalP = container.querySelector('p') as HTMLElement;
+      allBlockElements.add(originalP);
+
+      const selected = container.querySelector('.s2') as HTMLElement;
+      splitParagraph(selected);
+      allBlockElements.add(container.querySelector('.wandok-split-paragraph') as HTMLElement);
+
+      restoreSplitParagraphs(allBlockElements);
+
+      expect(container.querySelectorAll('p').length).toBe(1);
+      expect(container.querySelector('p')?.textContent).toBe('ABC');
+      expect(container.querySelectorAll('.wandok-split-paragraph').length).toBe(0);
+    });
+
     it('중첩된 구조가 있는 문단도 올바르게 복원해야 한다', () => {
       container.innerHTML =
         '<p><span>A</span><span class="selected"><strong>B</strong><em>C</em></span></p>';

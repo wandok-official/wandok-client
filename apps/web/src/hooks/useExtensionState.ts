@@ -1,29 +1,33 @@
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ExtensionState } from '../types/landingTypes';
 import { checkExtensionActive } from '../utils/extensionDetector';
 
 const POLL_INTERVAL = 1000;
+const ACTIVATED_EVENT = 'wandok:activated';
+const DEACTIVATED_EVENT = 'wandok:deactivated';
 
 /**
  * 익스텐션 활성화 상태를 감지하는 커스텀 훅
  * (이 페이지는 익스텐션 설치 후 열리므로 설치 여부는 확인하지 않음)
+ *
+ * 활성화 이벤트는 content script가 document에 보낸다.
+ * 리스너 등록 전에 이미 켜져 있으면 첫 렌더의 shadow host 검사와 폴링이 보완한다.
  */
 export const useExtensionState = () => {
-  const [extensionState, setExtensionState] = useState<ExtensionState>('inactive');
+  const [extensionState, setExtensionState] = useState<ExtensionState>(() => (
+    checkExtensionActive() ? 'active' : 'inactive'
+  ));
 
   useEffect(() => {
     const checkState = () => {
       setExtensionState(checkExtensionActive() ? 'active' : 'inactive');
     };
 
-    // 초기 상태 확인
     checkState();
 
-    // 주기적으로 상태 확인
     const interval = setInterval(checkState, POLL_INTERVAL);
 
-    // 익스텐션 활성화/비활성화 이벤트 리스너
     const handleActivated = () => {
       setExtensionState('active');
     };
@@ -32,13 +36,13 @@ export const useExtensionState = () => {
       setExtensionState('inactive');
     };
 
-    window.addEventListener('wandok:activated', handleActivated);
-    window.addEventListener('wandok:deactivated', handleDeactivated);
+    document.addEventListener(ACTIVATED_EVENT, handleActivated);
+    document.addEventListener(DEACTIVATED_EVENT, handleDeactivated);
 
     return () => {
       clearInterval(interval);
-      window.removeEventListener('wandok:activated', handleActivated);
-      window.removeEventListener('wandok:deactivated', handleDeactivated);
+      document.removeEventListener(ACTIVATED_EVENT, handleActivated);
+      document.removeEventListener(DEACTIVATED_EVENT, handleDeactivated);
     };
   }, []);
 

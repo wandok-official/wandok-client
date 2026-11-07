@@ -54,7 +54,7 @@ describe('splitParagraph', () => {
       expect(newParagraph.classList.contains('wandok-split-paragraph')).toBe(true);
     });
 
-    it('wandok-text-wrapper가 중첩된 경우 실제 블록 요소를 찾아야 한다', () => {
+    it('wandok-text-wrapper가 중첩된 경우 실제 블록 요소를 분리해야 한다', () => {
       container.innerHTML =
         '<p>' +
         '<span class="wandok-text-wrapper">' +
@@ -67,7 +67,12 @@ describe('splitParagraph', () => {
 
       splitParagraph(innerWrapper);
 
-      expect(container.querySelectorAll('p').length).toBe(1);
+      const paragraphs = container.querySelectorAll('p');
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs[0].textContent).toBe('');
+      expect(paragraphs[1].textContent).toBe('AB');
+      expect(paragraphs[1].classList.contains('wandok-split-paragraph')).toBe(true);
+      expect(paragraphs[1].querySelector('.inner')).not.toBeNull();
     });
 
     it('마지막 자식 요소를 선택하면 새 문단은 마지막만 포함해야 한다', () => {
@@ -106,7 +111,7 @@ describe('splitParagraph', () => {
       document.body.removeChild(spanInBody);
     });
 
-    it('selectedElement가 parentBlock.childNodes에 없으면 분리하지 않아야 한다', () => {
+    it('블록의 직접 자식이 아닌 문장도 블록 기준으로 분리해야 한다', () => {
       container.innerHTML =
         '<p>' +
         '<span class="wandok-text-wrapper"><span class="nested-target">A</span></span>' +
@@ -116,8 +121,10 @@ describe('splitParagraph', () => {
 
       splitParagraph(nestedTarget);
 
-      expect(container.querySelectorAll('p').length).toBe(1);
-      expect(container.querySelector('p')?.textContent).toBe('AB');
+      const paragraphs = container.querySelectorAll('p');
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs[0].textContent).toBe('');
+      expect(paragraphs[1].textContent).toBe('AB');
     });
 
     it('첫번째 자식 요소를 선택하면 원본은 비워야 한다', () => {
@@ -191,6 +198,36 @@ describe('splitParagraph', () => {
 
   // ==================== 에러 상황 및 복구 ====================
   describe('연속 분리 및 복잡한 시나리오', () => {
+    it('인라인 요소 안의 문장에서 문단을 분리해야 한다', () => {
+      container.innerHTML =
+        '<p><strong><span class="s1">A</span><span class="s2">B</span></strong>' +
+        '<span class="s3">C</span></p>';
+      const selectedElement = container.querySelector('.s2') as HTMLElement;
+
+      splitParagraph(selectedElement);
+
+      const paragraphs = container.querySelectorAll('p');
+      expect(paragraphs.length).toBe(2);
+      expect(paragraphs[0].textContent).toBe('A');
+      expect(paragraphs[0].querySelector('strong')?.textContent).toBe('A');
+      expect(paragraphs[1].textContent).toBe('BC');
+      expect(paragraphs[1].classList.contains('wandok-split-paragraph')).toBe(true);
+      expect(paragraphs[1].querySelector('strong')?.textContent).toBe('B');
+    });
+
+    it('인라인 요소를 나누더라도 원본 id는 유지해야 한다', () => {
+      container.innerHTML =
+        '<p><em id="emphasis"><span class="s1">A</span><span class="s2">B</span></em></p>';
+      const selectedElement = container.querySelector('.s2') as HTMLElement;
+
+      splitParagraph(selectedElement);
+
+      const paragraphs = container.querySelectorAll('p');
+      expect(paragraphs[0].querySelector('em')?.id).toBe('emphasis');
+      expect(paragraphs[1].querySelector('em')?.id).toBe('');
+      expect(paragraphs[1].querySelector('em')?.hasAttribute('id')).toBe(false);
+    });
+
     it('이미 분리된 문단을 다시 분리할 수 있어야 한다', () => {
       const html = '<p><span class="s1">A</span>' +
         '<span class="s2">B</span><span class="s3">C</span></p>';
