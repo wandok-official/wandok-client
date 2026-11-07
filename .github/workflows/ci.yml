@@ -114,7 +114,9 @@ jobs:
   e2e:
     name: E2E
     needs: build-extension
-    runs-on: ubuntu-latest
+    # Playwright 1.57의 `install --with-deps`는 ubuntu-latest(26.04)용 Chromium
+    # 시스템 의존성을 설치하지 못한다. 지원 목록에 있는 24.04에서만 E2E를 돌린다.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

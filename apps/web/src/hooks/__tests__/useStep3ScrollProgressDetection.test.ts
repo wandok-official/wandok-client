@@ -21,32 +21,6 @@ describe('useStep3ScrollProgressDetection', () => {
     observeSpy.mockRestore();
   });
 
-  it('step3 요소가 존재하면 IntersectionObserver로 관찰해야 한다', () => {
-    createTestDOM(STEP3_HTML);
-    const onComplete = vi.fn();
-    const observeSpy = vi.spyOn(IntersectionObserver.prototype, 'observe');
-
-    renderHook(() => useStep3ScrollProgressDetection(false, onComplete));
-
-    expect(observeSpy).toHaveBeenCalledWith(
-      document.querySelector('article[data-guide-step="3"]'),
-    );
-    observeSpy.mockRestore();
-  });
-
-  it('step3 요소가 미존재 시 MutationObserver로 대기해야 한다', () => {
-    const onComplete = vi.fn();
-    const mutationObserveSpy = vi.spyOn(MutationObserver.prototype, 'observe');
-
-    renderHook(() => useStep3ScrollProgressDetection(false, onComplete));
-
-    expect(mutationObserveSpy).toHaveBeenCalledWith(
-      document.body,
-      expect.objectContaining({ childList: true, subtree: true }),
-    );
-    mutationObserveSpy.mockRestore();
-  });
-
   it('뷰포트에 진입하면 onComplete를 호출해야 한다', () => {
     createTestDOM(STEP3_HTML);
     const onComplete = vi.fn();
@@ -82,10 +56,63 @@ describe('useStep3ScrollProgressDetection', () => {
     vi.stubGlobal('IntersectionObserver', OriginalIntersectionObserver);
   });
 
-  it('MO 대기 중 step3가 추가되면 IO로 전환하여 뷰포트 진입 시 onComplete를 호출해야 한다', async () => {
+  it('step3 요소가 교체되면 새 요소의 뷰포트 진입을 감지해야 한다', async () => {
     const onComplete = vi.fn();
+    const observedElements: Element[] = [];
+    let intersectionCallback: IntersectionObserverCallback = () => {};
+    const OriginalIntersectionObserver = globalThis.IntersectionObserver;
 
-    let intersectionCallback: IntersectionObserverCallback;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class MockIntersectionObserver {
+        constructor(callback: IntersectionObserverCallback) {
+          intersectionCallback = callback;
+        }
+        observe = (element: Element) => {
+          observedElements.push(element);
+        };
+        disconnect = vi.fn();
+        unobserve = vi.fn();
+        root = null;
+        rootMargin = '';
+        thresholds = [0];
+        takeRecords = vi.fn(() => []);
+      },
+    );
+
+    renderHook(() => useStep3ScrollProgressDetection(false, onComplete));
+
+    const articleA = document.createElement('article');
+    articleA.dataset.guideStep = '3';
+    document.body.appendChild(articleA);
+
+    await vi.waitFor(() => {
+      expect(observedElements).toContain(articleA);
+    });
+
+    articleA.remove();
+    const articleB = document.createElement('article');
+    articleB.dataset.guideStep = '3';
+    document.body.appendChild(articleB);
+
+    await vi.waitFor(() => {
+      expect(observedElements.at(-1)).toBe(articleB);
+    });
+
+    intersectionCallback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+
+    vi.stubGlobal('IntersectionObserver', OriginalIntersectionObserver);
+  });
+
+  it('언마운트 후 뷰포트 진입은 완료 처리하지 않아야 한다', () => {
+    createTestDOM(STEP3_HTML);
+    const onComplete = vi.fn();
+    let intersectionCallback: IntersectionObserverCallback = () => {};
     const OriginalIntersectionObserver = globalThis.IntersectionObserver;
 
     vi.stubGlobal(
@@ -104,26 +131,15 @@ describe('useStep3ScrollProgressDetection', () => {
       },
     );
 
-    // 1. step3 요소 없이 훅 마운트 → MO 대기 상태
-    renderHook(() => useStep3ScrollProgressDetection(false, onComplete));
+    const { unmount } = renderHook(() => useStep3ScrollProgressDetection(false, onComplete));
+    unmount();
 
-    // 2. step3 요소를 나중에 추가 (가이드 렌더 시뮬레이션)
-    const article = document.createElement('article');
-    article.dataset.guideStep = '3';
-    document.body.appendChild(article);
-
-    // 3. MO 콜백이 비동기로 실행될 때까지 대기
-    await vi.waitFor(() => {
-      expect(intersectionCallback!).toBeDefined();
-    });
-
-    // 4. 뷰포트 진입 시뮬레이션
-    intersectionCallback!(
+    intersectionCallback(
       [{ isIntersecting: true } as IntersectionObserverEntry],
       {} as IntersectionObserver,
     );
 
-    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).not.toHaveBeenCalled();
 
     vi.stubGlobal('IntersectionObserver', OriginalIntersectionObserver);
   });

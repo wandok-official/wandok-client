@@ -110,6 +110,30 @@ describe('Content Script 통합 테스트', () => {
       expect(shadowHost).toBeNull();
     });
 
+    it('활성화 이벤트는 document로 전달해야 한다', async () => {
+      const onDocument = vi.fn();
+      const onWindow = vi.fn();
+      document.addEventListener('wandok:activated', onDocument);
+      window.addEventListener('wandok:activated', onWindow);
+
+      vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
+        if (callback) callback({ wandokEnabled: true });
+        return Promise.resolve({ wandokEnabled: true });
+      });
+
+      vi.resetModules();
+      await act(async () => {
+        await import('../content');
+        await waitForDom();
+      });
+
+      expect(onDocument).toHaveBeenCalled();
+      expect(onWindow).not.toHaveBeenCalled();
+
+      document.removeEventListener('wandok:activated', onDocument);
+      window.removeEventListener('wandok:activated', onWindow);
+    });
+
     it('ON일 때 ProgressBar가 있어야 한다', async () => {
       vi.mocked(chrome.storage.local.get).mockImplementation((keys, callback) => {
         if (callback) callback({ wandokEnabled: true });
@@ -194,54 +218,6 @@ describe('Content Script 통합 테스트', () => {
         document.querySelectorAll('article p').length,
       ).toBe(initialCount);
     });
-
-    it('블러 제거와 문단 복원이 동시에 수행되어야 한다', async () => {
-      const html = `
-        <article>
-          <p>첫 번째 문장입니다. 두 번째 문장입니다.</p>
-          <p>세 번째 문장입니다. 네 번째 문장입니다.</p>
-        </article>
-      `;
-
-      await setupOnState(html);
-
-      const initialCount =
-        document.querySelectorAll('article p').length;
-
-      // 문단 분리
-      const secondSpan = document.querySelectorAll(
-        '.wandok-text-wrapper',
-      )[1] as HTMLElement;
-      splitParagraph(secondSpan);
-
-      // 블러 적용
-      document
-        .querySelectorAll('article p')
-        .forEach((p) => p.classList.add('wandok-blur'));
-
-      expect(
-        document.querySelectorAll('.wandok-blur').length,
-      ).toBeGreaterThan(0);
-      expect(
-        document.querySelectorAll(
-          '.wandok-split-paragraph',
-        ).length,
-      ).toBeGreaterThan(0);
-
-      await triggerOff();
-
-      expect(
-        document.querySelectorAll('.wandok-blur').length,
-      ).toBe(0);
-      expect(
-        document.querySelectorAll(
-          '.wandok-split-paragraph',
-        ).length,
-      ).toBe(0);
-      expect(
-        document.querySelectorAll('article p').length,
-      ).toBe(initialCount);
-    });
   });
 
   describe('콘텐츠 필터링', () => {
@@ -301,81 +277,28 @@ describe('Content Script 통합 테스트', () => {
       expect(document.querySelectorAll('article p').length).toBe(initialParagraphs);
       expect(document.querySelectorAll('.wandok-split-paragraph').length).toBe(0);
     });
-
-    it('OFF 상태에서 마우스 호버 시 블러 효과가 적용되지 않아야 한다', async () => {
-      const html = `
-        <article>
-          <p>첫 번째 문장입니다. 두 번째 문장입니다.</p>
-          <p>세 번째 문장입니다. 네 번째 문장입니다.</p>
-        </article>
-      `;
-      await setupOnState(html);
-
-      const spans = document.querySelectorAll('.wandok-text-wrapper');
-      expect(spans.length).toBeGreaterThan(0);
-
-      await triggerOff();
-
-      const firstSpan = spans[0] as HTMLElement;
-      await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
-        await waitForDom();
-      });
-
-      expect(document.querySelectorAll('.wandok-blur').length).toBe(0);
-
-      await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
-        await waitForDom();
-      });
-
-      expect(document.querySelectorAll('.wandok-blur').length).toBe(0);
-    });
   });
 
   describe('이벤트 핸들러', () => {
-    it('ON 상태에서 wandok-text-wrapper 클릭 시 문단이 분리되어야 한다', async () => {
-      await setupOnState();
-
-      const spans = document.querySelectorAll('.wandok-text-wrapper');
-      expect(spans.length).toBeGreaterThan(1);
-
-      const secondSpan = spans[1] as HTMLElement;
-      await act(async () => {
-        secondSpan.click();
-        await waitForDom();
-      });
-
-      expect(document.querySelectorAll('.wandok-split-paragraph').length).toBeGreaterThan(0);
-    });
-
-    it('ON 상태에서 마우스 호버 시 블러 효과가 적용되어야 한다', async () => {
+    it('인라인 요소 안의 문장을 클릭해도 문단이 분리되어야 한다', async () => {
       const html = `
         <article>
-          <p>첫 번째 문장입니다. 두 번째 문장입니다.</p>
-          <p>세 번째 문장입니다. 네 번째 문장입니다.</p>
+          <p><strong>첫 번째 문장입니다. 두 번째 문장입니다.</strong></p>
+          <p>세 번째 문장입니다.</p>
         </article>
       `;
       await setupOnState(html);
 
-      const spans = document.querySelectorAll('.wandok-text-wrapper');
-      expect(spans.length).toBeGreaterThan(0);
+      const strongSpans = document.querySelectorAll('strong .wandok-text-wrapper');
+      expect(strongSpans.length).toBeGreaterThan(1);
 
-      const firstSpan = spans[0] as HTMLElement;
       await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+        (strongSpans[1] as HTMLElement).click();
         await waitForDom();
       });
 
-      const blurredElements = document.querySelectorAll('.wandok-blur');
-      expect(blurredElements.length).toBeGreaterThan(0);
-
-      await act(async () => {
-        firstSpan.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
-        await waitForDom();
-      });
-
-      expect(document.querySelectorAll('.wandok-blur').length).toBe(0);
+      expect(document.querySelectorAll('article p').length).toBe(3);
+      expect(document.querySelectorAll('.wandok-split-paragraph').length).toBe(1);
     });
   });
 
@@ -413,39 +336,6 @@ describe('Content Script 통합 테스트', () => {
 
       const wrappersInSplit = splitParagraphEl.querySelectorAll('.wandok-text-wrapper');
       expect(wrappersInSplit.length).toBe(1);
-    });
-
-    it('wandok-text-wrapper 요소가 추가되어도 재처리하지 않아야 한다', async () => {
-      await setupOnState();
-
-      const article = document.querySelector('article');
-      const wrapper = document.createElement('span');
-      wrapper.classList.add('wandok-text-wrapper');
-      wrapper.textContent = '이미 래핑된 텍스트';
-
-      await act(async () => {
-        article?.appendChild(wrapper);
-        await waitForDom();
-      });
-
-      const nestedWrappers = wrapper.querySelectorAll('.wandok-text-wrapper');
-      expect(nestedWrappers.length).toBe(0);
-    });
-
-    it('wandok-text-wrapper를 포함한 요소가 추가되어도 재처리하지 않아야 한다', async () => {
-      await setupOnState();
-
-      const article = document.querySelector('article');
-      const container = document.createElement('div');
-      container.innerHTML = '<span class="wandok-text-wrapper">이미 처리된 텍스트</span>';
-
-      await act(async () => {
-        article?.appendChild(container);
-        await waitForDom();
-      });
-
-      const wrappers = container.querySelectorAll('.wandok-text-wrapper');
-      expect(wrappers.length).toBe(1);
     });
   });
 

@@ -34,14 +34,32 @@ describe('useExtensionState', () => {
     expect(result.current).toBe('active');
   });
 
-  it('wandok:activated 이벤트로 활성화를 감지해야 한다', () => {
+  it('마운트 시점에 shadow host가 있으면 즉시 active여야 한다', () => {
+    createShadowHost(SHADOW_HOST_ID);
+
+    const { result } = renderHook(() => useExtensionState());
+
+    expect(result.current).toBe('active');
+  });
+
+  it('document의 wandok:activated 이벤트로 활성화를 감지해야 한다', () => {
+    const { result } = renderHook(() => useExtensionState());
+
+    act(() => {
+      document.dispatchEvent(new Event('wandok:activated'));
+    });
+
+    expect(result.current).toBe('active');
+  });
+
+  it('window로만 전달된 활성화 이벤트는 무시해야 한다', () => {
     const { result } = renderHook(() => useExtensionState());
 
     act(() => {
       window.dispatchEvent(new Event('wandok:activated'));
     });
 
-    expect(result.current).toBe('active');
+    expect(result.current).toBe('inactive');
   });
 
   it('익스텐션 비활성화 시 폴링으로 inactive로 전환해야 한다', () => {
@@ -64,19 +82,19 @@ describe('useExtensionState', () => {
     const { result } = renderHook(() => useExtensionState());
 
     act(() => {
-      window.dispatchEvent(new Event('wandok:activated'));
+      document.dispatchEvent(new Event('wandok:activated'));
     });
     expect(result.current).toBe('active');
 
     act(() => {
-      window.dispatchEvent(new Event('wandok:deactivated'));
+      document.dispatchEvent(new Event('wandok:deactivated'));
     });
     expect(result.current).toBe('inactive');
   });
 
   it('언마운트 시 인터벌과 이벤트 리스너를 정리해야 한다', () => {
     const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
-    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+    const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener');
 
     const { unmount } = renderHook(() => useExtensionState());
     unmount();

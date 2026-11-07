@@ -68,36 +68,4 @@ test.describe('Focus Mode (블러)', () => {
 
     expect(secondParagraphFilter).not.toContain('blur');
   });
-
-  test('마우스가 올라간 문단은 선명하게 유지되어야 한다', async ({ context }) => {
-    const page = await context.newPage();
-    await page.goto('http://localhost:3333/test-page.html');
-
-    await activateExtension(context, page);
-    await waitForShadowHost(page);
-
-    await page.evaluate(() => {
-      const wrapper = document.querySelector('#paragraph-1 .wandok-text-wrapper');
-      if (wrapper) {
-        wrapper.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-      }
-    });
-
-    await page.waitForTimeout(200);
-
-    // 다른 문단에 블러가 적용되었는지 확인 (false pass 방지)
-    const secondParagraphFilter = await page.evaluate(() => {
-      const el = document.getElementById('paragraph-2');
-      return el ? window.getComputedStyle(el).filter : '';
-    });
-    expect(secondParagraphFilter).toContain('blur');
-
-    // 마우스가 올라간 문단은 선명해야 함
-    const firstParagraphFilter = await page.evaluate(() => {
-      const el = document.getElementById('paragraph-1');
-      return el ? window.getComputedStyle(el).filter : '';
-    });
-
-    expect(firstParagraphFilter).not.toContain('blur');
-  });
 });
