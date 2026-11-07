@@ -79,6 +79,14 @@ const processTextNode = (textNode: Node) => {
   const fragment = document.createDocumentFragment();
 
   sentences.forEach((sentenceText) => {
+    // 줄바꿈만 있는 조각은 문장이 아니다. 클릭 span으로 만들면 빈 대상이 된다.
+    if (!sentenceText.trim()) {
+      if (sentenceText) {
+        fragment.appendChild(document.createTextNode(sentenceText));
+      }
+      return;
+    }
+
     const sentenceSpan = document.createElement('span');
     sentenceSpan.textContent = sentenceText;
     sentenceSpan.classList.add('wandok-text-wrapper');

@@ -398,4 +398,53 @@ describe('Content Script 통합 테스트', () => {
       expect(document.querySelectorAll('.wandok-blur').length).toBeGreaterThan(0);
     });
   });
+
+  describe('문장 사이 공백', () => {
+    it('래핑 후에도 문장 사이 공백이 남아 있어야 한다', async () => {
+      const html = `
+        <article>
+          <p id="en">First sentence. Second sentence.</p>
+          <p id="ko">고정했습니다. Playwright</p>
+        </article>
+      `;
+
+      await setupOnState(html);
+
+      const joined = (selector: string) => Array.from(
+        document.querySelectorAll(selector),
+      ).map((wrapper) => wrapper.textContent).join('');
+
+      expect(joined('#en .wandok-text-wrapper')).toBe(
+        'First sentence. Second sentence.',
+      );
+      expect(document.querySelector('#en')?.textContent).toBe(
+        'First sentence. Second sentence.',
+      );
+      expect(joined('#ko .wandok-text-wrapper')).toBe(
+        '고정했습니다. Playwright',
+      );
+      expect(document.querySelector('#ko')?.textContent).toBe(
+        '고정했습니다. Playwright',
+      );
+    });
+
+    it('공백만 있는 조각은 클릭 래퍼로 만들지 않아야 한다', async () => {
+      const source = 'First sentence.\n\nSecond sentence.';
+      const html = `<article><p id="gap">${source}</p></article>`;
+
+      await setupOnState(html);
+
+      const gap = document.querySelector('#gap') as HTMLElement;
+      const wrappers = gap.querySelectorAll('.wandok-text-wrapper');
+
+      expect(wrappers.length).toBe(2);
+      wrappers.forEach((wrapper) => {
+        expect(wrapper.textContent?.trim()).not.toBe('');
+      });
+      expect(gap.textContent).toBe(source);
+      expect(
+        Array.from(wrappers).map((wrapper) => wrapper.textContent).join(''),
+      ).toBe('First sentence.\nSecond sentence.');
+    });
+  });
 });
